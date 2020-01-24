@@ -70,11 +70,11 @@ TextUTF8() = UTF16_To_UTF8(Name & vbNullChar)
 ParameterIndex = stub_sqlite3_bind_parameter_index(PropHandle, VarPtr(TextUTF8(0)))
 End Property
 
-Public Sub SetParameterValue(ByVal Index As Long, ByRef NewValue As Variant)
+Public Sub SetParameterValue(ByVal Index As Long, ByRef Value As Variant)
 Attribute SetParameterValue.VB_Description = "Binds a parameter value to the SQL statement."
 Const VT_BYREF As Long = &H4000, vbLongLong As Long = &H14
 Dim VT As Integer, IsByRef As Boolean
-CopyMemory VT, ByVal VarPtr(NewValue), 2
+CopyMemory VT, ByVal VarPtr(Value), 2
 If (VT And VT_BYREF) = VT_BYREF Then
     VT = VT And Not VT_BYREF
     IsByRef = True
@@ -85,27 +85,27 @@ Select Case VT
         Dim Int64 As Currency
         Select Case VT
             Case vbDecimal
-                VarI8FromDec NewValue, Int64
+                VarI8FromDec Value, Int64
                 Result = stub_sqlite3_bind_int64(PropHandle, Index, Int64)
             Case vbLongLong
-                CopyMemory Int64, ByVal UnsignedAdd(VarPtr(NewValue), 8), 8
+                CopyMemory Int64, ByVal UnsignedAdd(VarPtr(Value), 8), 8
                 Result = stub_sqlite3_bind_int64(PropHandle, Index, Int64)
             Case vbLong, vbInteger, vbByte
-                Result = stub_sqlite3_bind_int(PropHandle, Index, NewValue)
+                Result = stub_sqlite3_bind_int(PropHandle, Index, Value)
         End Select
     Case vbDouble ' SQLITE_FLOAT
-        Result = stub_sqlite3_bind_double(PropHandle, Index, NewValue)
+        Result = stub_sqlite3_bind_double(PropHandle, Index, Value)
     Case vbString ' SQLITE_TEXT
         Dim TextUTF8() As Byte
-        TextUTF8() = UTF16_To_UTF8(NewValue & vbNullChar)
+        TextUTF8() = UTF16_To_UTF8(Value & vbNullChar)
         Result = stub_sqlite3_bind_text(PropHandle, Index, VarPtr(TextUTF8(0)), -1, SQLITE_TRANSIENT)
     Case vbArray + vbByte ' SQLITE_BLOB
         Dim pArray As Long, pvData As Long
-        CopyMemory pArray, ByVal UnsignedAdd(VarPtr(NewValue), 8), 4
+        CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value), 8), 4
         If IsByRef = True Then CopyMemory pArray, ByVal pArray, 4
         If pArray <> 0 Then CopyMemory pvData, ByVal UnsignedAdd(pArray, 12), 4
         If pvData <> 0 Then
-            Result = stub_sqlite3_bind_blob(PropHandle, Index, pvData, LenB(NewValue), SQLITE_TRANSIENT)
+            Result = stub_sqlite3_bind_blob(PropHandle, Index, pvData, LenB(Value), SQLITE_TRANSIENT)
         Else
             Result = stub_sqlite3_bind_null(PropHandle, Index)
         End If
