@@ -1,0 +1,3 @@
+VBGROUP 5.0
+Project=..\VBSQLite10.vbp
+StartupProject=VBSQLite10Test.vbp
