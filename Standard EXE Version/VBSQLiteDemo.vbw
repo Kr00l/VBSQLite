@@ -1,0 +1,11 @@
+MainForm = 46, 10, 935, 683, C, 134, 298, 910, 971, C
+Common = -346, 141, 831, 689, C
+Startup = 36, 74, 958, 747, C
+sqlite3win32stubs = 0, 0, 0, 0, C
+sqlite3win32helper = 0, 0, 0, 0, C
+SQLiteBase = 0, 0, 0, 0, C
+SQLiteConnection = 0, 0, 0, 0, C
+SQLiteDataSet = 0, 0, 0, 0, C
+SQLiteColumns = 0, 0, 0, 0, C
+SQLiteColumn = 0, 0, 0, 0, C
+SQLiteCommand = 0, 0, 0, 0, C
