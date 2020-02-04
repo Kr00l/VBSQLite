@@ -77,6 +77,8 @@ Select Case Mode
                 PropHandle = 0
             End If
             Err.Raise Number:=vbObjectError + ErrVal, Description:=ErrMsg
+        Else
+            Call SQLiteOverloadBuiltinFunctions(PropHandle)
         End If
     Case Else
         Err.Raise 380
