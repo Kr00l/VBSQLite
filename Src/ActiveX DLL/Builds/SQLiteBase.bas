@@ -50,7 +50,7 @@ ASM(1) = -140418483381718.8329@
 ASM(2) = -4672484613390.9419@
 CopyMemory ByVal ASMWrapper, ByVal VarPtr(ASM(0)), 24
 CopyMemory ByVal UnsignedAdd(ASMWrapper, 24), &HC30672, 4
-CopyMemory ByVal UnsignedAdd(ASMWrapper, 10), UnsignedSub(Address, UnsignedAdd(ASMWrapper, 14)), 4
+CopyMemory ByVal UnsignedAdd(ASMWrapper, 10), UnsignedSub(UnsignedSub(Address, ASMWrapper), 14), 4
 CopyMemory ByVal UnsignedAdd(ASMWrapper, 16), cbParam, 1
 SQLiteCreateCDeclCallback = ASMWrapper
 End Function
