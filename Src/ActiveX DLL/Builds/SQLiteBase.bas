@@ -111,15 +111,6 @@ If cArg = 2 Then
                 Mid$(szPattern, Pos, 1) = "?"
             Case "%"
                 Mid$(szPattern, Pos, 1) = "*"
-                If Pos > 1 Then
-                    Do
-                        If Mid$(szPattern, Pos - 1, 1) = "%" Then
-                            Pos = Pos - 1
-                        Else
-                            Exit Do
-                        End If
-                    Loop While Pos > 1
-                End If
         End Select
         Pos = Pos - 1
     Loop
