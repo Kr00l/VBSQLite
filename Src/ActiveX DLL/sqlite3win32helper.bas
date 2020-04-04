@@ -37,6 +37,7 @@ Public Const SQLITE_DONE As Long = 101
 ' Extended Result Codes
 Public Const SQLITE_ERROR_MISSING_COLLSEQ As Long = &H101
 Public Const SQLITE_ERROR_RETRY As Long = &H201
+Public Const SQLITE_ERROR_SNAPSHOT As Long = &H301
 Public Const SQLITE_IOERR_READ As Long = &H10A
 Public Const SQLITE_IOERR_SHORT_READ As Long = &H20A
 Public Const SQLITE_IOERR_WRITE As Long = &H30A
@@ -76,6 +77,8 @@ Public Const SQLITE_CANTOPEN_NOTEMPDIR As Long = &H10E
 Public Const SQLITE_CANTOPEN_ISDIR As Long = &H20E
 Public Const SQLITE_CANTOPEN_FULLPATH As Long = &H30E
 Public Const SQLITE_CANTOPEN_CONVPATH As Long = &H40E
+Public Const SQLITE_CANTOPEN_DIRTYWAL As Long = &H50E
+Public Const SQLITE_CANTOPEN_SYMLINK As Long = &H60E
 Public Const SQLITE_CORRUPT_VTAB As Long = &H10B
 Public Const SQLITE_CORRUPT_SEQUENCE As Long = &H20B
 Public Const SQLITE_READONLY_RECOVERY As Long = &H108
@@ -95,11 +98,13 @@ Public Const SQLITE_CONSTRAINT_TRIGGER As Long = &H713
 Public Const SQLITE_CONSTRAINT_UNIQUE As Long = &H813
 Public Const SQLITE_CONSTRAINT_VTAB As Long = &H913
 Public Const SQLITE_CONSTRAINT_ROWID As Long = &HA13
+Public Const SQLITE_CONSTRAINT_PINNED As Long = &HB13
 Public Const SQLITE_NOTICE_RECOVER_WAL As Long = &H11B
 Public Const SQLITE_NOTICE_RECOVER_ROLLBACK As Long = &H21B
 Public Const SQLITE_WARNING_AUTOINDEX As Long = &H11C
 Public Const SQLITE_AUTH_USER As Long = &H117
 Public Const SQLITE_OK_LOAD_PERMANENTLY As Long = &H100
+Public Const SQLITE_OK_SYMLINK As Long = &H200
 
 ' File Open Operation Flags
 Public Const SQLITE_OPEN_READONLY As Long = &H1                     ' OK for sqlite3_open_v2()
@@ -122,6 +127,7 @@ Public Const SQLITE_OPEN_FULLMUTEX As Long = &H10000                ' OK for sql
 Public Const SQLITE_OPEN_SHAREDCACHE As Long = &H20000              ' OK for sqlite3_open_v2()
 Public Const SQLITE_OPEN_PRIVATECACHE As Long = &H40000             ' OK for sqlite3_open_v2()
 Public Const SQLITE_OPEN_WAL As Long = &H80000                      ' VFS only
+Public Const SQLITE_OPEN_NOFOLLOW As Long = &H1000000               ' OK for sqlite3_open_v2()
 
 ' Data Types
 Public Const SQLITE_INTEGER As Long = 1
@@ -144,6 +150,9 @@ Public Const SQLITE_UTF16_ALIGNED As Long = 8
 
 ' Function Flags
 Public Const SQLITE_DETERMINISTIC As Long = &H800
+Public Const SQLITE_DIRECTONLY As Long = &H80000
+Public Const SQLITE_SUBTYPE As Long = &H100000
+Public Const SQLITE_INNOCUOUS As Long = &H200000
 
 ' Device Characteristics
 Public Const SQLITE_IOCAP_ATOMIC As Long = &H1
@@ -208,6 +217,9 @@ Public Const SQLITE_FCNTL_BEGIN_ATOMIC_WRITE As Long = 31
 Public Const SQLITE_FCNTL_COMMIT_ATOMIC_WRITE As Long = 32
 Public Const SQLITE_FCNTL_ROLLBACK_ATOMIC_WRITE As Long = 33
 Public Const SQLITE_FCNTL_LOCK_TIMEOUT As Long = 34
+Public Const SQLITE_FCNTL_DATA_VERSION As Long = 35
+Public Const SQLITE_FCNTL_SIZE_LIMIT As Long = 36
+Public Const SQLITE_FCNTL_CKPT_DONE As Long = 37
 
 ' xAccess VFS Method Flags
 Public Const SQLITE_ACCESS_EXISTS As Long = 0
@@ -249,6 +261,7 @@ Public Const SQLITE_CONFIG_PMASZ As Long = 25
 Public Const SQLITE_CONFIG_STMTJRNL_SPILL As Long = 26
 Public Const SQLITE_CONFIG_SMALL_MALLOC As Long = 27
 Public Const SQLITE_CONFIG_SORTERREF_SIZE As Long = 28
+Public Const SQLITE_CONFIG_MEMDB_MAXSIZE As Long = 29
 
 ' Database Connection Configuration Options
 Public Const SQLITE_DBCONFIG_MAINDBNAME As Long = 1000
@@ -261,6 +274,14 @@ Public Const SQLITE_DBCONFIG_NO_CKPT_ON_CLOSE As Long = 1006
 Public Const SQLITE_DBCONFIG_ENABLE_QPSG As Long = 1007
 Public Const SQLITE_DBCONFIG_TRIGGER_EQP As Long = 1008
 Public Const SQLITE_DBCONFIG_RESET_DATABASE As Long = 1009
+Public Const SQLITE_DBCONFIG_DEFENSIVE As Long = 1010
+Public Const SQLITE_DBCONFIG_WRITABLE_SCHEMA As Long = 1011
+Public Const SQLITE_DBCONFIG_LEGACY_ALTER_TABLE As Long = 1012
+Public Const SQLITE_DBCONFIG_DQS_DML As Long = 1013
+Public Const SQLITE_DBCONFIG_DQS_DDL As Long = 1014
+Public Const SQLITE_DBCONFIG_ENABLE_VIEW As Long = 1015
+Public Const SQLITE_DBCONFIG_LEGACY_FILE_FORMAT As Long = 1016
+Public Const SQLITE_DBCONFIG_TRUSTED_SCHEMA As Long = 1017
 
 ' Authorizer Return Codes
 Public Const SQLITE_DENY As Long = 1
@@ -324,6 +345,8 @@ Public Const SQLITE_LIMIT_WORKER_THREADS As Long = 11
 
 ' Prepare Flags
 Public Const SQLITE_PREPARE_PERSISTENT As Long = &H1
+Public Const SQLITE_PREPARE_NORMALIZE As Long = &H2
+Public Const SQLITE_PREPARE_NO_VTAB As Long = &H4
 
 ' Virtual Table Scan Flags
 Public Const SQLITE_INDEX_SCAN_UNIQUE As Long = 1
@@ -343,6 +366,7 @@ Public Const SQLITE_INDEX_CONSTRAINT_ISNOT As Long = 69
 Public Const SQLITE_INDEX_CONSTRAINT_ISNOTNULL As Long = 70
 Public Const SQLITE_INDEX_CONSTRAINT_ISNULL As Long = 71
 Public Const SQLITE_INDEX_CONSTRAINT_IS As Long = 72
+Public Const SQLITE_INDEX_CONSTRAINT_FUNCTION As Long = 150
 
 ' Mutex Types
 Public Const SQLITE_MUTEX_FAST As Long = 0
@@ -406,6 +430,8 @@ Public Const SQLITE_CHECKPOINT_TRUNCATE As Long = 3
 
 ' Virtual Table Configuration Options
 Public Const SQLITE_VTAB_CONSTRAINT_SUPPORT As Long = 1
+Public Const SQLITE_VTAB_INNOCUOUS As Long = 2
+Public Const SQLITE_VTAB_DIRECTONLY As Long = 3
 
 ' Conflict Resolution Modes
 Public Const SQLITE_ROLLBACK As Long = 1
