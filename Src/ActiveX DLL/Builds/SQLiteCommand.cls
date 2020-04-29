@@ -14,6 +14,8 @@ Attribute VB_Exposed = True
 Option Explicit
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare Function VarI8FromDec Lib "oleaut32" (ByRef iDecIn As Variant, ByRef i64Out As Currency) As Long
+Private Const VT_BYREF As Integer = &H4000
+Private Const VT_I8 As Integer = &H14
 Private PropHandle As Long
 Private PropDBConnection As SQLiteConnection
 
@@ -72,22 +74,17 @@ End Property
 
 Public Sub SetParameterValue(ByVal Index As Long, ByRef Value As Variant)
 Attribute SetParameterValue.VB_Description = "Binds a parameter value to the SQL statement."
-Const VT_BYREF As Long = &H4000, vbLongLong As Long = &H14
-Dim VT As Integer, IsByRef As Boolean
-CopyMemory VT, ByVal VarPtr(Value), 2
-If (VT And VT_BYREF) = VT_BYREF Then
-    VT = VT And Not VT_BYREF
-    IsByRef = True
-End If
+Dim VT As Integer
+VT = VarType(Value)
 Dim Result As Long
 Select Case VT
-    Case vbDecimal, vbLongLong, vbLong, vbInteger, vbByte ' SQLITE_INTEGER
+    Case vbDecimal, VT_I8, vbLong, vbInteger, vbByte ' SQLITE_INTEGER
         Dim Int64 As Currency
         Select Case VT
             Case vbDecimal
                 VarI8FromDec Value, Int64
                 Result = stub_sqlite3_bind_int64(PropHandle, Index, Int64)
-            Case vbLongLong
+            Case VT_I8
                 CopyMemory Int64, ByVal UnsignedAdd(VarPtr(Value), 8), 8
                 Result = stub_sqlite3_bind_int64(PropHandle, Index, Int64)
             Case vbLong, vbInteger, vbByte
@@ -102,7 +99,8 @@ Select Case VT
     Case vbArray + vbByte ' SQLITE_BLOB
         Dim pArray As Long, pvData As Long
         CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value), 8), 4
-        If IsByRef = True Then CopyMemory pArray, ByVal pArray, 4
+        CopyMemory VT, ByVal VarPtr(Value), 2
+        If (VT And VT_BYREF) = VT_BYREF Then CopyMemory pArray, ByVal pArray, 4
         If pArray <> 0 Then CopyMemory pvData, ByVal UnsignedAdd(pArray, 12), 4
         If pvData <> 0 Then
             Result = stub_sqlite3_bind_blob(PropHandle, Index, pvData, LenB(Value), SQLITE_TRANSIENT)
