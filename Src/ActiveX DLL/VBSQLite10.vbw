@@ -6,4 +6,4 @@ SQLiteConnection = 24, 31, 810, 573, C
 SQLiteDataSet = 23, 31, 812, 573, C
 SQLiteColumns = 0, 0, 0, 0, C
 SQLiteColumn = 23, 31, 817, 573, C
-SQLiteCommand = 0, 0, 0, 0, C
+SQLiteCommand = 26, 34, 903, 713, C
