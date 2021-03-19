@@ -220,6 +220,8 @@ Public Const SQLITE_FCNTL_LOCK_TIMEOUT As Long = 34
 Public Const SQLITE_FCNTL_DATA_VERSION As Long = 35
 Public Const SQLITE_FCNTL_SIZE_LIMIT As Long = 36
 Public Const SQLITE_FCNTL_CKPT_DONE As Long = 37
+Public Const SQLITE_FCNTL_RESERVE_BYTES As Long = 38
+Public Const SQLITE_FCNTL_CKPT_START As Long = 39
 
 ' xAccess VFS Method Flags
 Public Const SQLITE_ACCESS_EXISTS As Long = 0
@@ -348,6 +350,11 @@ Public Const SQLITE_PREPARE_PERSISTENT As Long = &H1
 Public Const SQLITE_PREPARE_NORMALIZE As Long = &H2
 Public Const SQLITE_PREPARE_NO_VTAB As Long = &H4
 
+' Transaction States
+Public Const SQLITE_TXN_NONE As Long = 0
+Public Const SQLITE_TXN_READ As Long = 1
+Public Const SQLITE_TXN_WRITE As Long = 2
+
 ' Virtual Table Scan Flags
 Public Const SQLITE_INDEX_SCAN_UNIQUE As Long = 1
 
@@ -450,6 +457,11 @@ Public Const SQLITE_SCANSTAT_SELECTID As Long = 5
 
 ' Serialize Flags
 Public Const SQLITE_SERIALIZE_NOCOPY As Long = &H1
+
+' Deserialize Flags
+Public Const SQLITE_DESERIALIZE_FREEONCLOSE As Long = 1
+Public Const SQLITE_DESERIALIZE_RESIZEABLE As Long = 2
+Public Const SQLITE_DESERIALIZE_READONLY As Long = 4
 
 ' Win32 Directory Types
 Public Const SQLITE_WIN32_DATA_DIRECTORY_TYPE As Long = 1
