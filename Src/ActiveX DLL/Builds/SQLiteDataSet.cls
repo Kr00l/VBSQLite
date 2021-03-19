@@ -12,6 +12,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
+Private Const ARR_BUMP As Long = 10
 Private Type TCOLS
 Cols() As Variant
 End Type
@@ -33,16 +34,19 @@ Set PropColumns = Nothing
 End Sub
 
 Friend Function FInit(ByVal hStmt As Long) As Boolean
-Dim Result As Long, Count As Long, iCol As Long
+Dim Result As Long, ArrUBound As Long, Cols As Long, iCol As Long
 Dim Int64 As Currency
 Result = stub_sqlite3_step(hStmt)
+ArrUBound = -1
 While Result = SQLITE_ROW
-    PropRecordCount(0) = PropRecordCount(0) + 1
-    ReDim Preserve PropValues.Rows(0 To PropRecordCount(0) - 1) As TCOLS
-    With PropValues.Rows(PropRecordCount(0) - 1)
-    Count = stub_sqlite3_data_count(hStmt)
-    ReDim .Cols(0 To Count - 1) As Variant
-    For iCol = 0 To Count - 1
+    If PropRecordCount(0) > ArrUBound Then
+        ArrUBound = PropRecordCount(0) + ARR_BUMP - 1
+        ReDim Preserve PropValues.Rows(0 To ArrUBound) As TCOLS
+    End If
+    With PropValues.Rows(PropRecordCount(0))
+    Cols = stub_sqlite3_data_count(hStmt)
+    ReDim .Cols(0 To (Cols - 1)) As Variant
+    For iCol = 0 To (Cols - 1)
         Select Case stub_sqlite3_column_type(hStmt, iCol)
             Case SQLITE_INTEGER
                 Int64 = stub_sqlite3_column_int64(hStmt, iCol)
@@ -63,11 +67,15 @@ While Result = SQLITE_ROW
         End Select
     Next iCol
     End With
+    PropRecordCount(0) = PropRecordCount(0) + 1
     Result = stub_sqlite3_step(hStmt)
 Wend
 If Result = SQLITE_DONE Then
     PropColumns.FInit Me, hStmt, PropRecordCount(1)
-    If PropRecordCount(0) > 0 Then PropPosition = 1
+    If PropRecordCount(0) > 0 Then
+        If ArrUBound > (PropRecordCount(0) - 1) Then ReDim Preserve PropValues.Rows(0 To (PropRecordCount(0) - 1)) As TCOLS
+        PropPosition = 1
+    End If
     FInit = True
 End If
 End Function

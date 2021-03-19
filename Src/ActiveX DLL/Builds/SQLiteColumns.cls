@@ -35,7 +35,7 @@ If Count > 0 Then
     ObjectPointer = ObjPtr(Object)
     Dim iCol As Long, Item As SQLiteColumn, ErrValue As Long
     Dim Key As String, Key_Ext As String, Key_Cnt As Long
-    For iCol = 0 To Count - 1
+    For iCol = 0 To (Count - 1)
         Set Item = New SQLiteColumn
         Key = vbNullString
         Key_Ext = vbNullString
