@@ -34,7 +34,7 @@ Set PropColumns = Nothing
 End Sub
 
 Friend Function FInit(ByVal hStmt As Long) As Boolean
-Dim Result As Long, ArrUBound As Long, Cols As Long, iCol As Long
+Dim Result As Long, ArrUBound As Long, Count As Long, iCol As Long
 Dim Int64 As Currency
 Result = stub_sqlite3_step(hStmt)
 ArrUBound = -1
@@ -44,9 +44,9 @@ While Result = SQLITE_ROW
         ReDim Preserve PropValues.Rows(0 To ArrUBound) As TCOLS
     End If
     With PropValues.Rows(PropRecordCount(0))
-    Cols = stub_sqlite3_data_count(hStmt)
-    ReDim .Cols(0 To (Cols - 1)) As Variant
-    For iCol = 0 To (Cols - 1)
+    Count = stub_sqlite3_data_count(hStmt)
+    ReDim .Cols(0 To (Count - 1)) As Variant
+    For iCol = 0 To (Count - 1)
         Select Case stub_sqlite3_column_type(hStmt, iCol)
             Case SQLITE_INTEGER
                 Int64 = stub_sqlite3_column_int64(hStmt, iCol)
