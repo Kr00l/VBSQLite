@@ -96,9 +96,9 @@ End Sub
 Public Property Get FileName(Optional ByVal DBName As String = "main") As String
 Attribute FileName.VB_Description = "Returns the filename of a SQLite database."
 If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
-Dim SQLUTF8() As Byte, Result As Long
-SQLUTF8() = UTF16_To_UTF8(DBName & vbNullChar)
-Result = stub_sqlite3_db_filename(PropHandle, VarPtr(SQLUTF8(0)))
+Dim DBNameUTF8() As Byte, Result As Long
+DBNameUTF8() = UTF16_To_UTF8(DBName & vbNullChar)
+Result = stub_sqlite3_db_filename(PropHandle, VarPtr(DBNameUTF8(0)))
 If Result <> 0 Then
     FileName = SQLiteUTF8PtrToStr(Result)
 Else
@@ -109,9 +109,9 @@ End Property
 Public Property Get ReadOnly(Optional ByVal DBName As String = "main") As Boolean
 Attribute ReadOnly.VB_Description = "Indicates if a SQLite database is read-only."
 If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
-Dim SQLUTF8() As Byte, Result As Long
-SQLUTF8() = UTF16_To_UTF8(DBName & vbNullChar)
-Result = stub_sqlite3_db_readonly(PropHandle, VarPtr(SQLUTF8(0)))
+Dim DBNameUTF8() As Byte, Result As Long
+DBNameUTF8() = UTF16_To_UTF8(DBName & vbNullChar)
+Result = stub_sqlite3_db_readonly(PropHandle, VarPtr(DBNameUTF8(0)))
 If Result <> -1 Then
     ReadOnly = CBool(Result = 1)
 Else
