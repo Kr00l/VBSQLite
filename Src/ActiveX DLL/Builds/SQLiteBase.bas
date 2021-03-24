@@ -1,6 +1,5 @@
 Attribute VB_Name = "SQLiteBase"
 Option Explicit
-Option Compare Text
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare Function VirtualAlloc Lib "kernel32" (ByRef lpAddress As Long, ByVal dwSize As Long, ByVal flAllocType As Long, ByVal flProtect As Long) As Long
 Private Declare Function VirtualFree Lib "kernel32" (ByRef lpAddress As Long, ByVal dwSize As Long, ByVal dwFreeType As Long) As Long
@@ -114,7 +113,7 @@ If cArg = 2 Then
         End Select
         Pos = Pos - 1
     Loop
-    If szString Like szPattern Then ' Option Compare Text
+    If TextCompareLike(szString, szPattern) Then
         stub_sqlite3_result_int pCtx, 1
     Else
         stub_sqlite3_result_int pCtx, 0
