@@ -81,9 +81,12 @@ End If
 End Sub
 
 Private Sub CommandInsert_Click()
+Dim Text As String
+Text = VBA.InputBox("szText")
+If StrPtr(Text) = 0 Then Exit Sub
 On Error GoTo CATCH_EXCEPTION
 With DBConnection
-.Execute "INSERT INTO test_table (szText) VALUES ('" & VBA.InputBox("szText") & "')"
+.Execute "INSERT INTO test_table (szText) VALUES ('" & Text & "')"
 End With
 Call Requery
 Exit Sub
