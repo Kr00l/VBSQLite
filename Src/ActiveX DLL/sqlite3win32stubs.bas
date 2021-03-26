@@ -255,6 +255,7 @@ Private Declare Function sqlite3_win32_set_directory16 Lib "sqlite3win32.dll" (B
 Private Declare Function sqlite3_win32_sleep Lib "sqlite3win32.dll" (ByVal dwMilliseconds As Long) As Long
 Private Declare Function sqlite3_win32_utf8_to_mbcs Lib "sqlite3win32.dll" (ByVal pzFilename As Long) As Long
 Private Declare Function sqlite3_win32_write_debug Lib "sqlite3win32.dll" (ByVal pzBuffer As Long, ByVal nBuffer As Long) As Long
+Private Declare Function sqlite3_regexp_init Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzErrMsg As Long, ByVal pApi As Long) As Long
 
 Public Function stub_sqlite3_aggregate_context(ByVal pCtx As Long, ByVal nBytes As Long) As Long
 stub_sqlite3_aggregate_context = sqlite3_aggregate_context(pCtx, nBytes)
@@ -1234,4 +1235,8 @@ End Function
 
 Public Function stub_sqlite3_win32_write_debug(ByVal pzBuffer As Long, ByVal nBuffer As Long) As Long
 stub_sqlite3_win32_write_debug = sqlite3_win32_write_debug(pzBuffer, nBuffer)
+End Function
+
+Public Function stub_sqlite3_regexp_init(ByVal hDB As Long, ByVal pzErrMsg As Long, ByVal pApi As Long) As Long
+stub_sqlite3_regexp_init = sqlite3_regexp_init(hDB, pzErrMsg, pApi)
 End Function
