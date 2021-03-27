@@ -59,13 +59,14 @@ Select Case Mode
         End If
         Dim FileNameUTF8() As Byte, Flags As Long, Result As Long
         FileNameUTF8() = UTF16_To_UTF8(FileName & vbNullChar)
+        Flags = SQLITE_OPEN_FULLMUTEX Or SQLITE_OPEN_PRIVATECACHE
         Select Case Mode
             Case SQLiteReadOnly
-                Flags = SQLITE_OPEN_READONLY
+                Flags = Flags Or SQLITE_OPEN_READONLY
             Case SQLiteReadWrite
-                Flags = SQLITE_OPEN_READWRITE
+                Flags = Flags Or SQLITE_OPEN_READWRITE
             Case SQLiteReadWriteCreate
-                Flags = SQLITE_OPEN_READWRITE Or SQLITE_OPEN_CREATE
+                Flags = Flags Or SQLITE_OPEN_READWRITE Or SQLITE_OPEN_CREATE
         End Select
         Result = stub_sqlite3_open_v2(VarPtr(FileNameUTF8(0)), PropHandle, Flags, 0)
         If Result <> SQLITE_OK Then

@@ -61,12 +61,12 @@ Const STR_LIKE_UTF8 As Currency = 116256.1868@
 Const STR_NOCASE_UTF8 As Currency = 7622387953.2366@
 If hDB <> 0 Then
     If SQLiteCDeclCallbackLowerUpper <> 0 Then
-        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LOWER_UTF8), 1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC, 0, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
-        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LOWER_UTF8), 1, SQLITE_UTF16 Or SQLITE_DETERMINISTIC, 0, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
-        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UPPER_UTF8), 1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC, 1, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
-        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UPPER_UTF8), 1, SQLITE_UTF16 Or SQLITE_DETERMINISTIC, 1, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
+        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LOWER_UTF8), 1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 0, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
+        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LOWER_UTF8), 1, SQLITE_UTF16 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 0, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
+        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UPPER_UTF8), 1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 1, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
+        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UPPER_UTF8), 1, SQLITE_UTF16 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 1, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
     End If
-    If SQLiteCDeclCallbackLike <> 0 Then stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LIKE_UTF8), 2, SQLITE_UTF8 Or SQLITE_DETERMINISTIC, 0, SQLiteCDeclCallbackLike, 0, 0, 0
+    If SQLiteCDeclCallbackLike <> 0 Then stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LIKE_UTF8), 2, SQLITE_UTF8 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 0, SQLiteCDeclCallbackLike, 0, 0, 0
     If SQLiteCDeclCallbackNoCaseCollating <> 0 Then stub_sqlite3_create_collation_v2 hDB, VarPtr(STR_NOCASE_UTF8), SQLITE_UTF8, 0, SQLiteCDeclCallbackNoCaseCollating, 0
 End If
 End Sub
