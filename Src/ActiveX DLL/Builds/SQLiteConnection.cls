@@ -80,6 +80,7 @@ Select Case Mode
             Err.Raise Number:=vbObjectError + ErrVal, Description:=ErrMsg
         Else
             stub_sqlite3_regexp_init PropHandle, 0, 0
+            stub_sqlite3_concat_init PropHandle, 0, 0
             Call SQLiteOverloadBuiltinFunctions(PropHandle)
         End If
     Case Else
