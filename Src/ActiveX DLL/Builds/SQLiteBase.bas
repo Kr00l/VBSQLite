@@ -55,10 +55,10 @@ SQLiteCreateCDeclCallback = ASMWrapper
 End Function
 
 Public Sub SQLiteOverloadBuiltinFunctions(ByVal hDB As Long)
-Const STR_LOWER_UTF8 As Currency = 35335066.8108@
-Const STR_UPPER_UTF8 As Currency = 35335020.9621@
-Const STR_LIKE_UTF8 As Currency = 116256.1868@
-Const STR_NOCASE_UTF8 As Currency = 7622387953.2366@
+Const STR_LOWER_UTF8 As Currency = 49132859.7868@
+Const STR_UPPER_UTF8 As Currency = 49132813.9381@
+Const STR_LIKE_UTF8 As Currency = 170153.8156@
+Const STR_NOCASE_UTF8 As Currency = 11154622955.0958@
 If hDB <> 0 Then
     If SQLiteCDeclCallbackLowerUpper <> 0 Then
         stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LOWER_UTF8), 1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 0, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
