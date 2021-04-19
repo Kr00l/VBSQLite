@@ -20,6 +20,10 @@ SQLiteReadOnly = 0
 SQLiteReadWrite = 1
 SQLiteReadWriteCreate = 2
 End Enum
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
+Private Declare Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
+Private Declare Function VarI8FromDec Lib "oleaut32" (ByRef iDecIn As Variant, ByRef i64Out As Currency) As Long
+Private Const VT_I8 As Integer = &H14
 Private PropHandle As Long
 
 Private Sub Class_Initialize()
@@ -49,7 +53,7 @@ Attribute Version.VB_Description = "Returns the version of the SQLite library."
 Version = SQLiteUTF8PtrToStr(stub_sqlite3_libversion())
 End Property
 
-Public Sub OpenDB(ByVal FileName As String, Optional ByVal Mode As SQLiteOpenMode = SQLiteReadWriteCreate)
+Public Sub OpenDB(ByVal FileName As String, Optional ByVal Mode As SQLiteOpenMode = SQLiteReadWriteCreate, Optional ByVal SharedCache As Boolean)
 Attribute OpenDB.VB_Description = "Opens the SQLite database connection."
 Select Case Mode
     Case SQLiteReadOnly, SQLiteReadWrite, SQLiteReadWriteCreate
@@ -59,7 +63,7 @@ Select Case Mode
         End If
         Dim FileNameUTF8() As Byte, Flags As Long, Result As Long
         FileNameUTF8() = UTF16_To_UTF8(FileName & vbNullChar)
-        Flags = SQLITE_OPEN_FULLMUTEX Or SQLITE_OPEN_PRIVATECACHE
+        Flags = SQLITE_OPEN_FULLMUTEX
         Select Case Mode
             Case SQLiteReadOnly
                 Flags = Flags Or SQLITE_OPEN_READONLY
@@ -68,6 +72,11 @@ Select Case Mode
             Case SQLiteReadWriteCreate
                 Flags = Flags Or SQLITE_OPEN_READWRITE Or SQLITE_OPEN_CREATE
         End Select
+        If SharedCache = False Then
+            Flags = Flags Or SQLITE_OPEN_PRIVATECACHE
+        Else
+            Flags = Flags Or SQLITE_OPEN_SHAREDCACHE
+        End If
         Result = stub_sqlite3_open_v2(VarPtr(FileNameUTF8(0)), PropHandle, Flags, 0)
         If Result <> SQLITE_OK Then
             Dim ErrVal As Long, ErrMsg As String
@@ -128,6 +137,50 @@ If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be 
 AffectedRows = stub_sqlite3_changes(PropHandle)
 End Property
 
+Public Property Get LastInsertRowID() As Variant
+Attribute LastInsertRowID.VB_Description = "Returns/sets the rowid of the most recent successful insert into a rowid table."
+If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
+Dim Int64 As Currency
+Int64 = stub_sqlite3_last_insert_rowid(PropHandle)
+If Int64 >= -214748.3648@ And Int64 <= 214748.3647@ Then
+    LastInsertRowID = CLng(Int64 * 10000@)
+Else
+    LastInsertRowID = CDec(0)
+    VarDecFromI8 Int64, LastInsertRowID
+End If
+End Property
+
+Public Property Let LastInsertRowID(ByVal Value As Variant)
+If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
+Dim VT As Integer
+VT = VarType(Value)
+Select Case VT
+    Case vbDecimal, VT_I8, vbLong, vbInteger, vbByte
+        Dim Int64 As Currency
+        Select Case VT
+            Case vbDecimal
+                VarI8FromDec Value, Int64
+            Case VT_I8
+                CopyMemory Int64, ByVal UnsignedAdd(VarPtr(Value), 8), 8
+            Case vbLong, vbInteger, vbByte
+                Int64 = Value / 10000@
+        End Select
+        stub_sqlite3_set_last_insert_rowid PropHandle, Int64
+    Case Else
+        Err.Raise 380
+End Select
+End Property
+
+Public Property Get AutoCommit() As Boolean
+Attribute AutoCommit.VB_Description = "Returns a value that determines whether or not the SQLite database connection is in autocommit mode."
+If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
+AutoCommit = CBool(stub_sqlite3_get_autocommit(PropHandle) <> 0)
+End Property
+
+Public Property Let AutoCommit(ByVal Value As Boolean)
+Err.Raise Number:=383, Description:="Property is read-only"
+End Property
+
 Public Sub Execute(ByVal SQL As String)
 Attribute Execute.VB_Description = "Executes a SQL statement."
 If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
@@ -175,3 +228,34 @@ Else
     Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(PropHandle), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(PropHandle))
 End If
 End Function
+
+Public Sub BackupDB(ByVal Destination As SQLiteConnection, Optional ByVal DestinationDBName As String = "main", Optional ByVal SourceDBName As String = "main")
+Attribute BackupDB.VB_Description = "Backups (copies) a SQLite database between two SQLite database connections."
+If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
+If Destination Is Nothing Then
+    Err.Raise Number:=35607, Description:="Required argument is missing"
+ElseIf Destination.hDB = 0 Then
+    Err.Raise Number:=35607, Description:="Required argument is missing"
+ElseIf Destination Is Me Then
+    Err.Raise Number:=35700, Description:="Circular object referencing is not allowed"
+End If
+Dim DestinationDBNameUTF8() As Byte, SourceDBNameUTF8() As Byte, pBackup As Long
+DestinationDBNameUTF8() = UTF16_To_UTF8(DestinationDBName & vbNullChar)
+SourceDBNameUTF8() = UTF16_To_UTF8(SourceDBName & vbNullChar)
+pBackup = stub_sqlite3_backup_init(Destination.hDB, VarPtr(DestinationDBNameUTF8(0)), PropHandle, VarPtr(SourceDBNameUTF8(0)))
+If pBackup <> 0 Then
+    stub_sqlite3_backup_step pBackup, -1
+    stub_sqlite3_backup_finish pBackup
+End If
+Dim ErrVal As Long
+ErrVal = stub_sqlite3_errcode(Destination.hDB)
+If ErrVal <> SQLITE_OK Then Err.Raise Number:=vbObjectError + ErrVal, Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(Destination.hDB))
+End Sub
+
+Public Sub SetProgressHandler(ByVal Handler As ISQLiteProgressHandler, Optional ByVal VMInstructions As Long = 100)
+Attribute SetProgressHandler.VB_Description = "Registers/unregisters a progress handler callback to be invoked during long running SQL statements. An example use case is to keep a GUI updated and responsive."
+If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
+If VMInstructions < 0 Then Err.Raise 380
+If Handler Is Nothing Then VMInstructions = 0
+stub_sqlite3_progress_handler PropHandle, VMInstructions, AddressOf SQLiteProgressHandlerCallback, ObjPtr(Handler)
+End Sub

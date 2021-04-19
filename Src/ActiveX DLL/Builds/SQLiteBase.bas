@@ -116,6 +116,12 @@ Public Function SQLiteFunctionNoCaseCollating(ByVal pNotUsed As Long, ByVal nKey
 SQLiteFunctionNoCaseCollating = StrComp(SQLiteUTF8PtrToStr(pKey1, nKey1), SQLiteUTF8PtrToStr(pKey2, nKey2), vbTextCompare)
 End Function
 
+Public Function SQLiteProgressHandlerCallback(ByVal pArg As ISQLiteProgressHandler) As Long
+Dim Cancel As Boolean
+pArg.Callback Cancel
+If Cancel = False Then SQLiteProgressHandlerCallback = 0 Else SQLiteProgressHandlerCallback = 1
+End Function
+
 Public Function SQLiteBlobToByteArray(ByVal Ptr As Long, ByVal Size As Long) As Variant
 If Ptr <> 0 And Size > 0 Then
     Dim B() As Byte
