@@ -1,6 +1,6 @@
 Type=Exe
 Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\..\..\WINDOWS\system32\stdole2.tlb#OLE Automation
-Reference=*\G{717DBCA2-673D-4F4F-A195-12434533D224}#1.0#0#..\..\..\..\..\..\WINDOWS\system32\VBSQLite10.DLL#VB SQLite Library 1.0
+Reference=*\G{4391691D-B18E-4864-858F-021BF8FDC45F}#1.0#0#..\..\..\..\..\..\WINDOWS\system32\VBSQLite11.DLL#VB SQLite Library 1.1
 Form=MainForm.frm
 Module=Common; Common\Common.bas
 Module=Startup; Common\Startup.bas
