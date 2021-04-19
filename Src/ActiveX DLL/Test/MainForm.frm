@@ -49,10 +49,21 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+Implements ISQLiteProgressHandler
 Private Declare Function LoadLibrary Lib "kernel32" Alias "LoadLibraryW" (ByVal lpLibFileName As Long) As Long
 Private Declare Function FreeLibrary Lib "kernel32" (ByVal hLibModule As Long) As Long
 Private hLib As Long
 Private DBConnection As SQLiteConnection
+
+Private Sub ISQLiteProgressHandler_Callback(Cancel As Boolean)
+' The SetProgressHandler method (which registers this callback) has a default value of 100 for the
+' number of virtual machine instructions that are evaluated between successive invocations of this callback.
+' This means that this callback is never invoked for very short running SQL statements.
+' An example use case for this handler is to keep the GUI updated and responsive.
+' The operation will be interrupted if the cancel parameter is set to true.
+' This can be used to implement a "cancel" button on a GUI progress dialog box.
+DoEvents
+End Sub
 
 Private Sub Form_Load()
 ' When referencing to the VBSQLite10.DLL then sqlite3win32.dll is built into it.
@@ -84,6 +95,7 @@ If DBConnection Is Nothing Then
     On Error GoTo 0
     If .hDB <> 0 Then
         Set DBConnection = .Object
+        .SetProgressHandler Me ' Registers the progress handler callback
         CommandInsert.Enabled = True
         List1.Enabled = True
         Call Requery
@@ -127,6 +139,7 @@ Private Sub CommandClose_Click()
 If DBConnection Is Nothing Then
     MsgBox "Not connected.", vbExclamation
 Else
+    DBConnection.SetProgressHandler Nothing ' Unregisters the progress handler callback (optional)
     DBConnection.CloseDB
     Set DBConnection = Nothing
     CommandInsert.Enabled = False
