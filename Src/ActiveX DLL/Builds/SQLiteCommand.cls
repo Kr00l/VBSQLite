@@ -24,10 +24,10 @@ stub_sqlite3_finalize PropHandle
 Set PropDBConnection = Nothing
 End Sub
 
-Friend Function FInit(ByVal hStmt As Long, ByVal DBConnection As SQLiteConnection)
+Friend Sub FInit(ByVal hStmt As Long, ByVal DBConnection As SQLiteConnection)
 PropHandle = hStmt
 Set PropDBConnection = DBConnection
-End Function
+End Sub
 
 Public Property Get Object() As Object
 Attribute Object.VB_Description = "Returns the own instance."
