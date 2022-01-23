@@ -16,7 +16,7 @@ Private Declare Function sqlite3_bind_null Lib "sqlite3win32.dll" (ByVal hStmt A
 Private Declare Function sqlite3_bind_parameter_count Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
 Private Declare Function sqlite3_bind_parameter_index Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal pzName As Long) As Long
 Private Declare Function sqlite3_bind_parameter_name Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal i As Long) As Long
-Private Declare Function sqlite3_bind_pointer Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal i As Long, ByVal pPtr As Long, ByVal pzPType As Long, ByVal lpfnDestroy As Long)
+Private Declare Function sqlite3_bind_pointer Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal i As Long, ByVal pPtr As Long, ByVal pzPType As Long, ByVal lpfnDestroy As Long) As Long
 Private Declare Function sqlite3_bind_text Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal i As Long, ByVal pzData As Long, ByVal nData As Long, ByVal lpfnDestroy As Long) As Long
 Private Declare Function sqlite3_bind_text16 Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal i As Long, ByVal pzData As Long, ByVal nData As Long, ByVal lpfnDestroy As Long) As Long
 Private Declare Function sqlite3_bind_text64 Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal i As Long, ByVal pzData As Long, ByVal nData As Currency, ByVal lpfnDestroy As Long, ByVal Encoding As Byte) As Long
@@ -168,7 +168,7 @@ Private Declare Function sqlite3_result_text16be Lib "sqlite3win32.dll" (ByVal p
 Private Declare Function sqlite3_result_text16le Lib "sqlite3win32.dll" (ByVal pCtx As Long, ByVal pz As Long, ByVal n As Long, ByVal lpfnDestroy As Long) As Long
 Private Declare Function sqlite3_result_text64 Lib "sqlite3win32.dll" (ByVal pCtx As Long, ByVal pz As Long, ByVal n As Currency, ByVal lpfnDestroy As Long, ByVal Encoding As Byte) As Long
 Private Declare Function sqlite3_result_value Lib "sqlite3win32.dll" (ByVal pCtx As Long, ByVal pValue As Long) As Long
-Private Declare Function sqlite3_result_pointer Lib "sqlite3win32.dll" (ByVal pCtx As Long, ByVal pPtr As Long, ByVal pzPType As Long, ByVal lpfnDestroy As Long)
+Private Declare Function sqlite3_result_pointer Lib "sqlite3win32.dll" (ByVal pCtx As Long, ByVal pPtr As Long, ByVal pzPType As Long, ByVal lpfnDestroy As Long) As Long
 Private Declare Function sqlite3_result_zeroblob Lib "sqlite3win32.dll" (ByVal pCtx As Long, ByVal n As Long) As Long
 Private Declare Function sqlite3_result_zeroblob64 Lib "sqlite3win32.dll" (ByVal pCtx As Long, ByVal n As Currency) As Long
 Private Declare Function sqlite3_rollback_hook Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal lpfnCallback As Long, ByVal pArg As Long) As Long
@@ -240,7 +240,7 @@ Private Declare Function sqlite3_vfs_register Lib "sqlite3win32.dll" (ByVal pVfs
 Private Declare Function sqlite3_vfs_unregister Lib "sqlite3win32.dll" (ByVal pVfs As Long) As Long
 Private Declare Function sqlite3_vmprintf Lib "sqlite3win32.dll" (ByVal pzFormat As Long, ByVal va_list As Long) As Long
 Private Declare Function sqlite3_vsnprintf Lib "sqlite3win32.dll" (ByVal n As Long, ByVal pzBuffer As Long, ByVal pzFormat As Long, ByVal va_list As Long) As Long
-Private Declare Function sqlite3_vtab_collation Lib "sqlite3win32.dll" (ByVal pIdxInfo As Long, ByVal iCons As Long)
+Private Declare Function sqlite3_vtab_collation Lib "sqlite3win32.dll" (ByVal pIdxInfo As Long, ByVal iCons As Long) As Long
 Private Declare Function sqlite3_vtab_nochange Lib "sqlite3win32.dll" (ByVal pCtx As Long) As Long
 Private Declare Function sqlite3_vtab_on_conflict Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
 Private Declare Function sqlite3_wal_autocheckpoint Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal nFrame As Long) As Long
