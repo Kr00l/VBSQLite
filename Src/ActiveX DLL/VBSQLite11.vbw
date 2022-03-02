@@ -1,5 +1,5 @@
 Common = 12, 214, 1214, 897, C
-sqlite3win32stubs = 44, 58, 1339, 909, C
+sqlite3win32stubs = 44, 58, 1500, 943, C
 sqlite3win32helper = 22, 29, 1222, 865, C
 SQLiteBase = 100, 113, 1439, 908, C
 SQLiteConnection = 24, 31, 1353, 765, C

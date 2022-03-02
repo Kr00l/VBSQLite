@@ -121,6 +121,7 @@ Public Const SQLITE_OPEN_TRANSIENT_DB As Long = &H400               ' VFS only
 Public Const SQLITE_OPEN_MAIN_JOURNAL As Long = &H800               ' VFS only
 Public Const SQLITE_OPEN_TEMP_JOURNAL As Long = &H1000              ' VFS only
 Public Const SQLITE_OPEN_SUBJOURNAL As Long = &H2000                ' VFS only
+Public Const SQLITE_OPEN_SUPER_JOURNAL As Long = &H4000             ' VFS only
 Public Const SQLITE_OPEN_MASTER_JOURNAL As Long = &H4000            ' VFS only
 Public Const SQLITE_OPEN_NOMUTEX As Long = &H8000&                  ' OK for sqlite3_open_v2()
 Public Const SQLITE_OPEN_FULLMUTEX As Long = &H10000                ' OK for sqlite3_open_v2()
@@ -128,6 +129,7 @@ Public Const SQLITE_OPEN_SHAREDCACHE As Long = &H20000              ' OK for sql
 Public Const SQLITE_OPEN_PRIVATECACHE As Long = &H40000             ' OK for sqlite3_open_v2()
 Public Const SQLITE_OPEN_WAL As Long = &H80000                      ' VFS only
 Public Const SQLITE_OPEN_NOFOLLOW As Long = &H1000000               ' OK for sqlite3_open_v2()
+Public Const SQLITE_OPEN_EXRESCODE As Long = &H2000000              ' Extended result codes
 
 ' Data Types
 Public Const SQLITE_INTEGER As Long = 1
