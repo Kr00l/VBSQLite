@@ -71,7 +71,7 @@ While Result = SQLITE_ROW
     Result = stub_sqlite3_step(hStmt)
 Wend
 If Result = SQLITE_DONE Then
-    PropColumns.FInit Me, hStmt, PropRecordCount(1)
+    PropColumns.FInit Me, Nothing, hStmt, PropRecordCount(1)
     If PropRecordCount(0) > 0 Then
         If ArrUBound > (PropRecordCount(0) - 1) Then ReDim Preserve PropValues.Rows(0 To (PropRecordCount(0) - 1)) As TCOLS
         PropPosition = 1

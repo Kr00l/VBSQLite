@@ -28,11 +28,12 @@ Attribute NewEnum.VB_MemberFlags = "40"
 Set NewEnum = PropColumn.[_NewEnum]
 End Function
 
-Friend Sub FInit(ByVal Object As SQLiteDataSet, ByVal hStmt As Long, ByRef Count As Long)
+Friend Sub FInit(ByVal DataSet As SQLiteDataSet, ByVal Cursor As SQLiteCursor, ByVal hStmt As Long, ByRef Count As Long)
 Count = stub_sqlite3_column_count(hStmt)
 If Count > 0 Then
-    Dim ObjectPointer As Long
-    ObjectPointer = ObjPtr(Object)
+    Dim ObjectPointer(0 To 1) As Long
+    ObjectPointer(0) = ObjPtr(DataSet)
+    ObjectPointer(1) = ObjPtr(Cursor)
     Dim iCol As Long, Item As SQLiteColumn, ErrValue As Long
     Dim Key As String, Key_Ext As String, Key_Cnt As Long
     For iCol = 0 To (Count - 1)
@@ -40,7 +41,7 @@ If Count > 0 Then
         Key = vbNullString
         Key_Ext = vbNullString
         Key_Cnt = 0
-        Item.FInit 0, 0, Key, hStmt, iCol
+        Item.FInit 0, 0, 0, Key, hStmt, iCol
         On Error Resume Next
         PropColumn.Add Item, Key
         ErrValue = Err.Number
@@ -55,7 +56,7 @@ If Count > 0 Then
             Key = Key_Ext
             PropColumn.Add Item, Key
         End If
-        Item.FInit ObjectPointer, iCol + 1, Key, 0, -1
+        Item.FInit ObjectPointer(0), ObjectPointer(1), iCol + 1, Key, 0, -1
     Next iCol
 End If
 End Sub

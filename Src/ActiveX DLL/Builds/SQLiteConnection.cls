@@ -229,6 +229,25 @@ Else
 End If
 End Function
 
+Public Function CreateCursor(ByVal SQL As String) As SQLiteCursor
+Attribute CreateCursor.VB_Description = "Creates a SQL query in which data can be retrieved and where the cursor is treated as an iterator."
+If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
+Dim SQLUTF8() As Byte, hStmt As Long, Result As Long
+SQLUTF8() = UTF16_To_UTF8(SQL & vbNullChar)
+Result = stub_sqlite3_prepare_v3(PropHandle, VarPtr(SQLUTF8(0)), UBound(SQLUTF8()) + 1, SQLITE_PREPARE_PERSISTENT, hStmt, 0)
+If Result = SQLITE_OK Then
+    If stub_sqlite3_stmt_readonly(hStmt) <> 0 Then
+        Set CreateCursor = New SQLiteCursor
+        CreateCursor.FInit hStmt, Me
+    Else
+        stub_sqlite3_finalize hStmt
+        Err.Raise Number:=5, Description:="SQL statement must be read-only"
+    End If
+Else
+    Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(PropHandle), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(PropHandle))
+End If
+End Function
+
 Public Sub BackupDB(ByVal Destination As SQLiteConnection, Optional ByVal DestinationDBName As String = "main", Optional ByVal SourceDBName As String = "main")
 Attribute BackupDB.VB_Description = "Backups (copies) a SQLite database between two SQLite database connections."
 If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"

@@ -12,7 +12,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
-Private ShadowObjectPointer As Long
+Private ShadowObjectPointer_0 As Long, ShadowObjectPointer_1 As Long
 Private PropIndex As Long, PropKey As String
 Private PropName As String
 Private PropTypeName As String
@@ -21,10 +21,14 @@ Private PropTableName As String
 Private PropDBName As String
 
 Private Function ShadowDataSet() As SQLiteDataSet
-If ShadowObjectPointer <> 0 Then Set ShadowDataSet = PtrToObj(ShadowObjectPointer)
+Set ShadowDataSet = PtrToObj(ShadowObjectPointer_0)
 End Function
 
-Friend Sub FInit(ByVal ObjectPointer As Long, ByVal Index As Long, ByRef Key As String, ByVal hStmt As Long, ByVal iCol As Long)
+Private Function ShadowCursor() As SQLiteCursor
+Set ShadowCursor = PtrToObj(ShadowObjectPointer_1)
+End Function
+
+Friend Sub FInit(ByVal ObjectPointer_0 As Long, ByVal ObjectPointer_1 As Long, ByVal Index As Long, ByRef Key As String, ByVal hStmt As Long, ByVal iCol As Long)
 If hStmt <> 0 And iCol > -1 Then
     PropName = SQLiteUTF8PtrToStr(stub_sqlite3_column_name(hStmt, iCol))
     PropTypeName = SQLiteUTF8PtrToStr(stub_sqlite3_column_decltype(hStmt, iCol))
@@ -33,7 +37,8 @@ If hStmt <> 0 And iCol > -1 Then
     PropDBName = SQLiteUTF8PtrToStr(stub_sqlite3_column_database_name(hStmt, iCol))
     Key = PropName
 Else
-    ShadowObjectPointer = ObjectPointer
+    ShadowObjectPointer_0 = ObjectPointer_0
+    ShadowObjectPointer_1 = ObjectPointer_1
     PropIndex = Index
     PropKey = Key
 End If
@@ -52,12 +57,16 @@ End Property
 Public Property Get Value() As Variant
 Attribute Value.VB_Description = "Returns the value of the column item from the current record."
 Attribute Value.VB_UserMemId = 0
-Dim Row As Long
-Row = ShadowDataSet.Position - 1
-If Row > -1 Then
-    Value = ShadowDataSet.ValueMatrix(Row, PropIndex - 1)
+If ShadowObjectPointer_0 <> 0 Then
+    Dim Row As Long
+    Row = ShadowDataSet.Position - 1
+    If Row > -1 Then
+        Value = ShadowDataSet.ValueMatrix(Row, PropIndex - 1)
+    Else
+        Err.Raise Number:=vbObjectError, Description:="Either BOF or EOF is True"
+    End If
 Else
-    Err.Raise Number:=vbObjectError, Description:="Either BOF or EOF is True"
+    Value = ShadowCursor.Value(PropIndex - 1)
 End If
 End Property
 

@@ -136,3 +136,22 @@ Else
     Err.Raise Number:=5, Description:="SQL statement must be read-only"
 End If
 End Function
+
+Public Function CreateCursor() As SQLiteCursor
+Attribute CreateCursor.VB_Description = "Creates a SQL query and returns a reference to a SQLiteCursor object."
+Dim Ptr As Long, hStmt As Long, Result As Long
+Ptr = stub_sqlite3_expanded_sql(PropHandle)
+Result = stub_sqlite3_prepare_v3(stub_sqlite3_db_handle(PropHandle), Ptr, -1, SQLITE_PREPARE_PERSISTENT, hStmt, 0)
+stub_sqlite3_free Ptr
+If Result = SQLITE_OK Then
+    If stub_sqlite3_stmt_readonly(hStmt) <> 0 Then
+        Set CreateCursor = New SQLiteCursor
+        CreateCursor.FInit hStmt, PropDBConnection
+    Else
+        stub_sqlite3_finalize hStmt
+        Err.Raise Number:=5, Description:="SQL statement must be read-only"
+    End If
+Else
+    Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(stub_sqlite3_db_handle(PropHandle)), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(stub_sqlite3_db_handle(PropHandle)))
+End If
+End Function
