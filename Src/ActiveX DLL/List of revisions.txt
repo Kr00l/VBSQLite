@@ -1,10 +1,4 @@
 List of revisions:
 
-02-Mar-2022
-- Revision update. (Version 1.1.2)
-
-23-Jan-2022
-- Revision update. (Version 1.1.1)
-
-19-Apr-2021
-- First release. (Version 1.1.0)
+27-Jul-2022
+- First release. (Version 1.2.0)
