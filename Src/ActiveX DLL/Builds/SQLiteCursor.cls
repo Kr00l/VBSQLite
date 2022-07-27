@@ -128,8 +128,13 @@ End Property
 Public Sub MoveFirst()
 Attribute MoveFirst.VB_Description = "Moves the position to the first record."
 If stub_sqlite3_reset(PropHandle) = SQLITE_OK Then
+    PropRecordCount(0) = 0
+    PropPosition = 0
     PropLastResult = stub_sqlite3_step(PropHandle)
-    If PropLastResult = SQLITE_ROW Then PropPosition = 1
+    If PropLastResult = SQLITE_ROW Then
+        PropRecordCount(0) = 1
+        PropPosition = 1
+    End If
 Else
     Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(stub_sqlite3_db_handle(PropHandle)), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(stub_sqlite3_db_handle(PropHandle)))
 End If
