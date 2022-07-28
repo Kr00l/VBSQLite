@@ -138,7 +138,7 @@ End If
 End Function
 
 Public Function CreateCursor() As SQLiteCursor
-Attribute CreateCursor.VB_Description = "Creates a SQL query and returns a reference to a SQLiteCursor object."
+Attribute CreateCursor.VB_Description = "Creates an expanded SQL query and returns a reference to a SQLiteCursor object."
 Dim Ptr As Long, hStmt As Long, Result As Long
 Ptr = stub_sqlite3_expanded_sql(PropHandle)
 Result = stub_sqlite3_prepare_v3(stub_sqlite3_db_handle(PropHandle), Ptr, -1, SQLITE_PREPARE_PERSISTENT, hStmt, 0)
