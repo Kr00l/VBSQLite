@@ -67,22 +67,16 @@ End Property
 
 Public Sub ClearParameters()
 Attribute ClearParameters.VB_Description = "Clears all parameter values to null."
-If PropLastResult <> 0 Then
-    If stub_sqlite3_reset(PropHandle) = SQLITE_OK Then
-        PropRecordCount(0) = 0
-        PropPosition = 0
-        PropLastResult = 0
-    Else
-        Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(stub_sqlite3_db_handle(PropHandle)), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(stub_sqlite3_db_handle(PropHandle)))
-    End If
-End If
+stub_sqlite3_reset PropHandle
+PropRecordCount(0) = 0
+PropPosition = 0
 stub_sqlite3_clear_bindings PropHandle
-If PropLastResult = 0 Then
-    PropLastResult = stub_sqlite3_step(PropHandle)
-    If PropLastResult = SQLITE_ROW Then
-        PropRecordCount(0) = 1
-        PropPosition = 1
-    End If
+PropLastResult = stub_sqlite3_step(PropHandle)
+If PropLastResult = SQLITE_ROW Then
+    PropRecordCount(0) = 1
+    PropPosition = 1
+ElseIf PropLastResult <> SQLITE_DONE Then
+    Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(stub_sqlite3_db_handle(PropHandle)), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(stub_sqlite3_db_handle(PropHandle)))
 End If
 End Sub
 
@@ -105,20 +99,14 @@ End Property
 
 Public Sub SetParameterValue(ByVal Index As Long, ByRef Value As Variant)
 Attribute SetParameterValue.VB_Description = "Binds a parameter value to the SQL query."
-If PropLastResult <> 0 Then
-    If stub_sqlite3_reset(PropHandle) = SQLITE_OK Then
-        PropRecordCount(0) = 0
-        PropPosition = 0
-        PropLastResult = 0
-    Else
-        Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(stub_sqlite3_db_handle(PropHandle)), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(stub_sqlite3_db_handle(PropHandle)))
-    End If
-End If
 Dim VT As Integer
 VT = VarType(Value)
 Dim Result As Long
 Select Case VT
     Case vbDecimal, VT_I8, vbLong, vbInteger, vbByte ' SQLITE_INTEGER
+        stub_sqlite3_reset PropHandle
+        PropRecordCount(0) = 0
+        PropPosition = 0
         Dim Int64 As Currency
         Select Case VT
             Case vbDecimal
@@ -131,12 +119,21 @@ Select Case VT
                 Result = stub_sqlite3_bind_int(PropHandle, Index, Value)
         End Select
     Case vbDouble ' SQLITE_FLOAT
+        stub_sqlite3_reset PropHandle
+        PropRecordCount(0) = 0
+        PropPosition = 0
         Result = stub_sqlite3_bind_double(PropHandle, Index, Value)
     Case vbString ' SQLITE_TEXT
+        stub_sqlite3_reset PropHandle
+        PropRecordCount(0) = 0
+        PropPosition = 0
         Dim TextUTF8() As Byte
         TextUTF8() = UTF16_To_UTF8(Value & vbNullChar)
         Result = stub_sqlite3_bind_text(PropHandle, Index, VarPtr(TextUTF8(0)), -1, SQLITE_TRANSIENT)
     Case vbArray + vbByte ' SQLITE_BLOB
+        stub_sqlite3_reset PropHandle
+        PropRecordCount(0) = 0
+        PropPosition = 0
         Dim pArray As Long, pvData As Long
         CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value), 8), 4
         CopyMemory VT, ByVal VarPtr(Value), 2
@@ -148,23 +145,19 @@ Select Case VT
             Result = stub_sqlite3_bind_null(PropHandle, Index)
         End If
     Case vbNull ' SQLITE_NULL
+        stub_sqlite3_reset PropHandle
+        PropRecordCount(0) = 0
+        PropPosition = 0
         Result = stub_sqlite3_bind_null(PropHandle, Index)
     Case Else
-        If PropLastResult = 0 Then
-            PropLastResult = stub_sqlite3_step(PropHandle)
-            If PropLastResult = SQLITE_ROW Then
-                PropRecordCount(0) = 1
-                PropPosition = 1
-            End If
-        End If
         Err.Raise 380
 End Select
-If PropLastResult = 0 Then
-    PropLastResult = stub_sqlite3_step(PropHandle)
-    If PropLastResult = SQLITE_ROW Then
-        PropRecordCount(0) = 1
-        PropPosition = 1
-    End If
+PropLastResult = stub_sqlite3_step(PropHandle)
+If PropLastResult = SQLITE_ROW Then
+    PropRecordCount(0) = 1
+    PropPosition = 1
+ElseIf PropLastResult <> SQLITE_DONE Then
+    Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(stub_sqlite3_db_handle(PropHandle)), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(stub_sqlite3_db_handle(PropHandle)))
 End If
 If Result <> SQLITE_OK Then Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(stub_sqlite3_db_handle(PropHandle)), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(stub_sqlite3_db_handle(PropHandle)))
 End Sub
@@ -235,15 +228,14 @@ End Property
 
 Public Sub MoveFirst()
 Attribute MoveFirst.VB_Description = "Moves the position to the first record."
-If stub_sqlite3_reset(PropHandle) = SQLITE_OK Then
-    PropRecordCount(0) = 0
-    PropPosition = 0
-    PropLastResult = stub_sqlite3_step(PropHandle)
-    If PropLastResult = SQLITE_ROW Then
-        PropRecordCount(0) = 1
-        PropPosition = 1
-    End If
-Else
+stub_sqlite3_reset PropHandle
+PropRecordCount(0) = 0
+PropPosition = 0
+PropLastResult = stub_sqlite3_step(PropHandle)
+If PropLastResult = SQLITE_ROW Then
+    PropRecordCount(0) = 1
+    PropPosition = 1
+ElseIf PropLastResult <> SQLITE_DONE Then
     Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(stub_sqlite3_db_handle(PropHandle)), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(stub_sqlite3_db_handle(PropHandle)))
 End If
 End Sub
