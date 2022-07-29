@@ -37,8 +37,8 @@ End Sub
 Friend Sub FInit(ByVal hStmt As Long, ByVal DBConnection As SQLiteConnection)
 PropHandle = hStmt
 Set PropDBConnection = DBConnection
-PropColumns.FInit Nothing, Me, hStmt, PropRecordCount(1)
-PropLastResult = stub_sqlite3_step(hStmt)
+PropColumns.FInit Nothing, Me, PropHandle, PropRecordCount(1)
+PropLastResult = stub_sqlite3_step(PropHandle)
 If PropLastResult = SQLITE_ROW Then
     PropRecordCount(0) = 1
     PropPosition = 1
@@ -203,11 +203,11 @@ If PropLastResult = SQLITE_ROW Then
                 VarDecFromI8 Int64, Value
             End If
         Case SQLITE_FLOAT
-            Value = stub_sqlite3_column_double(hStmt, Col)
+            Value = stub_sqlite3_column_double(PropHandle, Col)
         Case SQLITE_TEXT
-            Value = SQLiteUTF8PtrToStr(stub_sqlite3_column_text(hStmt, Col), stub_sqlite3_column_bytes(hStmt, Col))
+            Value = SQLiteUTF8PtrToStr(stub_sqlite3_column_text(PropHandle, Col), stub_sqlite3_column_bytes(PropHandle, Col))
         Case SQLITE_BLOB
-            Value = SQLiteBlobToByteArray(stub_sqlite3_column_blob(hStmt, Col), stub_sqlite3_column_bytes(hStmt, Col))
+            Value = SQLiteBlobToByteArray(stub_sqlite3_column_blob(PropHandle, Col), stub_sqlite3_column_bytes(PropHandle, Col))
         Case SQLITE_NULL
             Value = Null
     End Select
