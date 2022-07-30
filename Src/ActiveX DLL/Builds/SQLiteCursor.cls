@@ -34,7 +34,7 @@ Set PropDBConnection = Nothing
 Set PropColumns = Nothing
 End Sub
 
-Friend Sub FInit(ByVal hStmt As Long, ByVal DBConnection As SQLiteConnection)
+Friend Function FInit(ByVal hStmt As Long, ByVal DBConnection As SQLiteConnection) As Boolean
 PropHandle = hStmt
 Set PropDBConnection = DBConnection
 PropColumns.FInit Nothing, Me, PropHandle, PropRecordCount(1)
@@ -42,8 +42,11 @@ PropLastResult = stub_sqlite3_step(PropHandle)
 If PropLastResult = SQLITE_ROW Then
     PropRecordCount(0) = 1
     PropPosition = 1
+    FInit = True
+ElseIf PropLastResult = SQLITE_DONE Then
+    FInit = True
 End If
-End Sub
+End Function
 
 Public Property Get Object() As Object
 Attribute Object.VB_Description = "Returns the own instance."
@@ -247,7 +250,7 @@ If PropLastResult = SQLITE_ROW Then
     Select Case PropLastResult
         Case SQLITE_ROW
             PropPosition = PropPosition + 1
-            If PropPosition > PropRecordCount(0) Then PropRecordCount(0) = PropPosition
+            PropRecordCount(0) = PropPosition
         Case SQLITE_DONE
             PropPosition = PropPosition + 1
         Case Else
