@@ -31,9 +31,9 @@ End Function
 Friend Sub FInit(ByVal DataSet As SQLiteDataSet, ByVal Cursor As SQLiteCursor, ByVal hStmt As Long, ByRef Count As Long)
 Count = stub_sqlite3_column_count(hStmt)
 If Count > 0 Then
-    Dim ObjectPointer(0 To 1) As Long
-    ObjectPointer(0) = ObjPtr(DataSet)
-    ObjectPointer(1) = ObjPtr(Cursor)
+    Dim ObjectPointer_0 As Long, ObjectPointer_1 As Long
+    ObjectPointer_0 = ObjPtr(DataSet)
+    ObjectPointer_1 = ObjPtr(Cursor)
     Dim iCol As Long, Item As SQLiteColumn, ErrValue As Long
     Dim Key As String, Key_Ext As String, Key_Cnt As Long
     For iCol = 0 To (Count - 1)
@@ -56,7 +56,7 @@ If Count > 0 Then
             Key = Key_Ext
             PropColumn.Add Item, Key
         End If
-        Item.FInit ObjectPointer(0), ObjectPointer(1), iCol + 1, Key, 0, -1
+        Item.FInit ObjectPointer_0, ObjectPointer_1, iCol + 1, Key, 0, -1
     Next iCol
 End If
 End Sub
