@@ -130,9 +130,7 @@ Select Case VT
         stub_sqlite3_reset PropHandle
         PropRecordCount(0) = 0
         PropPosition = 0
-        Dim TextUTF8() As Byte
-        TextUTF8() = UTF16_To_UTF8(Value & vbNullChar)
-        Result = stub_sqlite3_bind_text(PropHandle, Index, VarPtr(TextUTF8(0)), -1, SQLITE_TRANSIENT)
+        Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(Value), -1, SQLITE_TRANSIENT)
     Case vbArray + vbByte ' SQLITE_BLOB
         stub_sqlite3_reset PropHandle
         PropRecordCount(0) = 0
