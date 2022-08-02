@@ -93,7 +93,9 @@ Select Case VT
     Case vbDouble ' SQLITE_FLOAT
         Result = stub_sqlite3_bind_double(PropHandle, Index, Value)
     Case vbString ' SQLITE_TEXT
-        Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(Value), -1, SQLITE_TRANSIENT)
+        Dim Text As String
+        Text = Value & vbNullChar
+        Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(Text), -1, SQLITE_TRANSIENT)
     Case vbArray + vbByte ' SQLITE_BLOB
         Dim pArray As Long, pvData As Long
         CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value), 8), 4
