@@ -130,9 +130,7 @@ Select Case VT
         stub_sqlite3_reset PropHandle
         PropRecordCount(0) = 0
         PropPosition = 0
-        Dim Text As String
-        Text = Value & vbNullChar
-        Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(Text), -1, SQLITE_TRANSIENT)
+        Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(Value), -1, SQLITE_TRANSIENT)
     Case vbArray + vbByte ' SQLITE_BLOB
         stub_sqlite3_reset PropHandle
         PropRecordCount(0) = 0

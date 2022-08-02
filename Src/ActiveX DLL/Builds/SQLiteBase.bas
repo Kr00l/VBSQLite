@@ -82,9 +82,9 @@ If cArg = 1 Then
     cbText = stub_sqlite3_value_bytes16(pValue)
     If cbText > 0 Then
         If stub_sqlite3_user_data(pCtx) = 0 Then
-            Text = LCase$(SQLiteUTF16PtrToStr(stub_sqlite3_value_text16(pValue), cbText / 2)) & vbNullChar
+            Text = LCase$(SQLiteUTF16PtrToStr(stub_sqlite3_value_text16(pValue), cbText / 2))
         Else
-            Text = UCase$(SQLiteUTF16PtrToStr(stub_sqlite3_value_text16(pValue), cbText / 2)) & vbNullChar
+            Text = UCase$(SQLiteUTF16PtrToStr(stub_sqlite3_value_text16(pValue), cbText / 2))
         End If
         stub_sqlite3_result_text16 pCtx, StrPtr(Text), -1, SQLITE_TRANSIENT
     Else
