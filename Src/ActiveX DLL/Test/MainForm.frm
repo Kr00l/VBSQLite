@@ -66,10 +66,10 @@ DoEvents
 End Sub
 
 Private Sub Form_Load()
-' When referencing to the VBSQLite10.DLL then sqlite3win32.dll is built into it.
+' When referencing to the VBSQLite12.DLL then sqlite3win32.dll is built into it.
 ' Only for this test debugging the LoadLibrary is necessary.
 hLib = LoadLibrary(StrPtr("sqlite3win32.dll"))
-If hLib = 0 Then LoadLibrary (StrPtr(lib_dir_sqlite3win32()))
+If hLib = 0 Then hLib = LoadLibrary(StrPtr(lib_dir_sqlite3win32()))
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
