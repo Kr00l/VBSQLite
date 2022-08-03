@@ -193,9 +193,8 @@ End Sub
 Public Function OpenDataSet(ByVal SQL As String) As SQLiteDataSet
 Attribute OpenDataSet.VB_Description = "Runs a SQL query and returns a reference to a SQLiteDataSet object."
 If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
-Dim SQLUTF8() As Byte, hStmt As Long, Result As Long
-SQLUTF8() = UTF16_To_UTF8(SQL & vbNullChar)
-Result = stub_sqlite3_prepare_v2(PropHandle, VarPtr(SQLUTF8(0)), UBound(SQLUTF8()) + 1, hStmt, 0)
+Dim hStmt As Long, Result As Long
+Result = stub_sqlite3_prepare16_v2(PropHandle, StrPtr(SQL), -1, hStmt, 0)
 If Result = SQLITE_OK Then
     If stub_sqlite3_stmt_readonly(hStmt) <> 0 Then
         Dim NewDataSet As New SQLiteDataSet
@@ -218,9 +217,8 @@ End Function
 Public Function CreateCommand(ByVal SQL As String) As SQLiteCommand
 Attribute CreateCommand.VB_Description = "Creates a SQL statement in which parameters can be bound."
 If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
-Dim SQLUTF8() As Byte, hStmt As Long, Result As Long
-SQLUTF8() = UTF16_To_UTF8(SQL & vbNullChar)
-Result = stub_sqlite3_prepare_v3(PropHandle, VarPtr(SQLUTF8(0)), UBound(SQLUTF8()) + 1, SQLITE_PREPARE_PERSISTENT, hStmt, 0)
+Dim hStmt As Long, Result As Long
+Result = stub_sqlite3_prepare16_v3(PropHandle, StrPtr(SQL), -1, SQLITE_PREPARE_PERSISTENT, hStmt, 0)
 If Result = SQLITE_OK Then
     Set CreateCommand = New SQLiteCommand
     CreateCommand.FInit hStmt, Me
@@ -232,9 +230,8 @@ End Function
 Public Function CreateCursor(ByVal SQL As String) As SQLiteCursor
 Attribute CreateCursor.VB_Description = "Creates a SQL query in which data can be retrieved and where the cursor is treated as an iterator."
 If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
-Dim SQLUTF8() As Byte, hStmt As Long, Result As Long
-SQLUTF8() = UTF16_To_UTF8(SQL & vbNullChar)
-Result = stub_sqlite3_prepare_v3(PropHandle, VarPtr(SQLUTF8(0)), UBound(SQLUTF8()) + 1, SQLITE_PREPARE_PERSISTENT, hStmt, 0)
+Dim hStmt As Long, Result As Long
+Result = stub_sqlite3_prepare16_v3(PropHandle, StrPtr(SQL), -1, SQLITE_PREPARE_PERSISTENT, hStmt, 0)
 If Result = SQLITE_OK Then
     If stub_sqlite3_stmt_readonly(hStmt) <> 0 Then
         Set CreateCursor = New SQLiteCursor
