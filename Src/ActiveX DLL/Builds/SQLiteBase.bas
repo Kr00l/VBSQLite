@@ -1,11 +1,8 @@
 Attribute VB_Name = "SQLiteBase"
 Option Explicit
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
-Private Declare Function VirtualAlloc Lib "kernel32" (ByRef lpAddress As Long, ByVal dwSize As Long, ByVal flAllocType As Long, ByVal flProtect As Long) As Long
-Private Declare Function VirtualFree Lib "kernel32" (ByRef lpAddress As Long, ByVal dwSize As Long, ByVal dwFreeType As Long) As Long
 Private Declare Function lstrlen Lib "kernel32" Alias "lstrlenW" (ByVal lpString As Long) As Long
 Private Declare Function lstrlenA Lib "kernel32" (ByVal lpString As Long) As Long
-Private Declare Function WideCharToMultiByte Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpWideCharStr As Long, ByVal cchWideChar As Long, ByVal lpMultiByteStr As Long, ByVal cbMultiByte As Long, ByVal lpDefaultChar As Long, ByVal lpUsedDefaultChar As Long) As Long
 Private Declare Function MultiByteToWideChar Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpMultiByteStr As Long, ByVal cbMultiByte As Long, ByVal lpWideCharStr As Long, ByVal cchWideChar As Long) As Long
 Private Const CP_UTF8 As Long = 65001
 Private Const JULIANDAY_OFFSET As Double = 2415018.5
@@ -13,46 +10,18 @@ Private Const MEM_COMMIT As Long = &H1000
 Private Const MEM_RELEASE As Long = &H8000&
 Private Const PAGE_EXECUTE_READWRITE As Long = &H40
 Private SQLiteRefCount As Long
-Private SQLiteCDeclCallbackLowerUpper As Long
-Private SQLiteCDeclCallbackLike As Long
-Private SQLiteCDeclCallbackNoCaseCollating As Long
 
 Public Sub SQLiteAddRef()
 ' It is recommended that applications always invoke sqlite3_initialize() directly prior to using any other functions.
 ' Future releases of SQLite may require this. In other words, the behavior exhibited when SQLite is compiled with SQLITE_OMIT_AUTOINIT might become the default behavior in some future release of SQLite.
-If SQLiteRefCount = 0 Then
-    stub_sqlite3_initialize
-    If SQLiteCDeclCallbackLowerUpper = 0 Then SQLiteCDeclCallbackLowerUpper = SQLiteCreateCDeclCallback(AddressOf SQLiteFunctionLowerUpper, 12)
-    If SQLiteCDeclCallbackLike = 0 Then SQLiteCDeclCallbackLike = SQLiteCreateCDeclCallback(AddressOf SQLiteFunctionLike, 12)
-    If SQLiteCDeclCallbackNoCaseCollating = 0 Then SQLiteCDeclCallbackNoCaseCollating = SQLiteCreateCDeclCallback(AddressOf SQLiteFunctionNoCaseCollating, 20)
-End If
+If SQLiteRefCount = 0 Then stub_sqlite3_initialize
 SQLiteRefCount = SQLiteRefCount + 1
 End Sub
 
 Public Sub SQLiteRelease()
 SQLiteRefCount = SQLiteRefCount - 1
-If SQLiteRefCount = 0 Then
-    stub_sqlite3_shutdown
-    If SQLiteCDeclCallbackLowerUpper <> 0 Then VirtualFree ByVal SQLiteCDeclCallbackLowerUpper, 0, MEM_RELEASE: SQLiteCDeclCallbackLowerUpper = 0
-    If SQLiteCDeclCallbackLike <> 0 Then VirtualFree ByVal SQLiteCDeclCallbackLike, 0, MEM_RELEASE: SQLiteCDeclCallbackLike = 0
-    If SQLiteCDeclCallbackNoCaseCollating <> 0 Then VirtualFree ByVal SQLiteCDeclCallbackNoCaseCollating, 0, MEM_RELEASE: SQLiteCDeclCallbackNoCaseCollating = 0
-End If
+If SQLiteRefCount = 0 Then stub_sqlite3_shutdown
 End Sub
-
-Private Function SQLiteCreateCDeclCallback(ByVal Address As Long, ByVal cbParam As Byte) As Long
-' Thanks to Paul Caton's Call CDECL source code.
-Dim ASMWrapper As Long
-ASMWrapper = VirtualAlloc(ByVal 0&, 28, MEM_COMMIT, PAGE_EXECUTE_READWRITE)
-Dim ASM(0 To 2) As Currency
-ASM(0) = 465203369712025.6232@
-ASM(1) = -140418483381718.8329@
-ASM(2) = -4672484613390.9419@
-CopyMemory ByVal ASMWrapper, ByVal VarPtr(ASM(0)), 24
-CopyMemory ByVal UnsignedAdd(ASMWrapper, 24), &HC30672, 4
-CopyMemory ByVal UnsignedAdd(ASMWrapper, 10), UnsignedSub(UnsignedSub(Address, ASMWrapper), 14), 4
-CopyMemory ByVal UnsignedAdd(ASMWrapper, 16), cbParam, 1
-SQLiteCreateCDeclCallback = ASMWrapper
-End Function
 
 Public Sub SQLiteOverloadBuiltinFunctions(ByVal hDB As Long)
 Const STR_LOWER_UTF8 As Currency = 49132859.7868@
@@ -60,17 +29,13 @@ Const STR_UPPER_UTF8 As Currency = 49132813.9381@
 Const STR_LIKE_UTF8 As Currency = 170153.8156@
 Const STR_NOCASE_UTF8 As Currency = 11154622955.0958@
 If hDB <> 0 Then
-    If SQLiteCDeclCallbackLowerUpper <> 0 Then
-        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LOWER_UTF8), 1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 0, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
-        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LOWER_UTF8), 1, SQLITE_UTF16 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 0, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
-        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UPPER_UTF8), 1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 1, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
-        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UPPER_UTF8), 1, SQLITE_UTF16 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 1, SQLiteCDeclCallbackLowerUpper, 0, 0, 0
-    End If
-    If SQLiteCDeclCallbackLike <> 0 Then
-        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LIKE_UTF8), 2, SQLITE_UTF8 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 0, SQLiteCDeclCallbackLike, 0, 0, 0
-        stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LIKE_UTF8), 3, SQLITE_UTF8, 0, 0, 0, 0, 0
-    End If
-    If SQLiteCDeclCallbackNoCaseCollating <> 0 Then stub_sqlite3_create_collation_v2 hDB, VarPtr(STR_NOCASE_UTF8), SQLITE_UTF8, 0, SQLiteCDeclCallbackNoCaseCollating, 0
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LOWER_UTF8), 1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 0, AddressOf SQLiteFunctionLowerUpper, 0, 0, 0
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LOWER_UTF8), 1, SQLITE_UTF16 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 0, AddressOf SQLiteFunctionLowerUpper, 0, 0, 0
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UPPER_UTF8), 1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 1, AddressOf SQLiteFunctionLowerUpper, 0, 0, 0
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UPPER_UTF8), 1, SQLITE_UTF16 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 1, AddressOf SQLiteFunctionLowerUpper, 0, 0, 0
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LIKE_UTF8), 2, SQLITE_UTF8 Or SQLITE_DETERMINISTIC Or SQLITE_INNOCUOUS, 0, AddressOf SQLiteFunctionLike, 0, 0, 0
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_LIKE_UTF8), 3, SQLITE_UTF8, 0, 0, 0, 0, 0
+    stub_sqlite3_create_collation_v2 hDB, VarPtr(STR_NOCASE_UTF8), SQLITE_UTF8, 0, AddressOf SQLiteFunctionNoCaseCollating, 0
 End If
 End Sub
 
