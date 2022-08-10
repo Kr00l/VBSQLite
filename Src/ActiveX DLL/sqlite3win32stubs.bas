@@ -83,6 +83,7 @@ Private Declare Function sqlite3_db_cacheflush Lib "sqlite3win32.dll" (ByVal hDB
 Private Declare Function sqlite3_db_filename Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzDbName As Long) As Long
 Private Declare Function sqlite3_db_handle Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
 Private Declare Function sqlite3_db_mutex Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
+Private Declare Function sqlite3_db_name Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal n As Long) As Long
 Private Declare Function sqlite3_db_readonly Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzDbName As Long) As Long
 Private Declare Function sqlite3_db_release_memory Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
 Private Declare Function sqlite3_db_status Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal StatusOpt As Long, ByVal pCurrent As Long, ByVal pHighwater As Long, ByVal ResetFlag As Long) As Long
@@ -94,6 +95,7 @@ Private Declare Function sqlite3_enable_shared_cache Lib "sqlite3win32.dll" (ByV
 Private Declare Function sqlite3_errcode Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
 Private Declare Function sqlite3_errmsg Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
 Private Declare Function sqlite3_errmsg16 Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
+Private Declare Function sqlite3_error_offset Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
 Private Declare Function sqlite3_errstr Lib "sqlite3win32.dll" (ByVal ResultCode As Long) As Long
 Private Declare Function sqlite3_exec Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzSQL As Long, ByVal lpfnCallback As Long, ByVal pArg As Long, ByVal pzErrMsg As Long) As Long
 Private Declare Function sqlite3_expanded_sql Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
@@ -242,7 +244,12 @@ Private Declare Function sqlite3_vfs_register Lib "sqlite3win32.dll" (ByVal pVfs
 Private Declare Function sqlite3_vfs_unregister Lib "sqlite3win32.dll" (ByVal pVfs As Long) As Long
 Private Declare Function sqlite3_vtab_collation Lib "sqlite3win32.dll" (ByVal pIdxInfo As Long, ByVal iCons As Long) As Long
 Private Declare Function sqlite3_vtab_nochange Lib "sqlite3win32.dll" (ByVal pCtx As Long) As Long
+Private Declare Function sqlite3_vtab_distinct Lib "sqlite3win32.dll" (ByVal pIdxInfo As Long) As Long
+Private Declare Function sqlite3_vtab_in Lib "sqlite3win32.dll" (ByVal pIdxInfo As Long, ByVal iCons As Long, ByVal bHandle As Long) As Long
+Private Declare Function sqlite3_vtab_in_first Lib "sqlite3win32.dll" (ByVal pValue As Long, ByVal pValueOut As Long) As Long
+Private Declare Function sqlite3_vtab_in_next Lib "sqlite3win32.dll" (ByVal pValue As Long, ByVal pValueOut As Long) As Long
 Private Declare Function sqlite3_vtab_on_conflict Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
+Private Declare Function sqlite3_vtab_rhs_value Lib "sqlite3win32.dll" (ByVal pIdxInfo As Long, ByVal i As Long, ByVal pValue As Long) As Long
 Private Declare Function sqlite3_wal_autocheckpoint Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal nFrame As Long) As Long
 Private Declare Function sqlite3_wal_checkpoint Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzDB As Long) As Long
 Private Declare Function sqlite3_wal_checkpoint_v2 Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzDB As Long, ByVal eMode As Long, ByVal pnLog As Long, ByVal pnCkpt As Long) As Long
@@ -590,6 +597,10 @@ Public Function stub_sqlite3_db_mutex(ByVal hDB As Long) As Long
 stub_sqlite3_db_mutex = sqlite3_db_mutex(hDB)
 End Function
 
+Public Function stub_sqlite3_db_name(ByVal hDB As Long, ByVal n As Long) As Long
+stub_sqlite3_db_name = sqlite3_db_name(hDB, n)
+End Function
+
 Public Function stub_sqlite3_db_readonly(ByVal hDB As Long, ByVal pzDbName As Long) As Long
 stub_sqlite3_db_readonly = sqlite3_db_readonly(hDB, pzDbName)
 End Function
@@ -632,6 +643,10 @@ End Function
 
 Public Function stub_sqlite3_errmsg16(ByVal hDB As Long) As Long
 stub_sqlite3_errmsg16 = sqlite3_errmsg16(hDB)
+End Function
+
+Public Function stub_sqlite3_error_offset(ByVal hDB As Long) As Long
+stub_sqlite3_error_offset = sqlite3_error_offset(hDB)
 End Function
 
 Public Function stub_sqlite3_errstr(ByVal ResultCode As Long) As Long
@@ -1186,12 +1201,32 @@ Public Function stub_sqlite3_vtab_collation(ByVal pIdxInfo As Long, ByVal iCons 
 stub_sqlite3_vtab_collation = sqlite3_vtab_collation(pIdxInfo, iCons)
 End Function
 
+Public Function stub_sqlite3_vtab_distinct(ByVal pIdxInfo As Long) As Long
+stub_sqlite3_vtab_distinct = sqlite3_vtab_distinct(pIdxInfo)
+End Function
+
+Public Function stub_sqlite3_vtab_in(ByVal pIdxInfo As Long, ByVal iCons As Long, ByVal bHandle As Long) As Long
+stub_sqlite3_vtab_in = sqlite3_vtab_in(pIdxInfo, iCons, bHandle)
+End Function
+
+Public Function stub_sqlite3_vtab_in_first(ByVal pValue As Long, ByVal pValueOut As Long) As Long
+stub_sqlite3_vtab_in_first = sqlite3_vtab_in_first(pValue, pValueOut)
+End Function
+
+Public Function stub_sqlite3_vtab_in_next(ByVal pValue As Long, ByVal pValueOut As Long) As Long
+stub_sqlite3_vtab_in_next = sqlite3_vtab_in_next(pValue, pValueOut)
+End Function
+
 Public Function stub_sqlite3_vtab_nochange(ByVal pCtx As Long) As Long
 stub_sqlite3_vtab_nochange = sqlite3_vtab_nochange(pCtx)
 End Function
 
 Public Function stub_sqlite3_vtab_on_conflict(ByVal hDB As Long) As Long
 stub_sqlite3_vtab_on_conflict = sqlite3_vtab_on_conflict(hDB)
+End Function
+
+Public Function stub_sqlite3_vtab_rhs_value(ByVal pIdxInfo As Long, ByVal i As Long, ByVal pValue As Long) As Long
+stub_sqlite3_vtab_rhs_value = sqlite3_vtab_rhs_value(pIdxInfo, i, pValue)
 End Function
 
 Public Function stub_sqlite3_wal_autocheckpoint(ByVal hDB As Long, ByVal nFrame As Long) As Long
