@@ -188,15 +188,6 @@ Private Declare Function sqlite3_soft_heap_limit Lib "sqlite3win32.dll" (ByVal n
 Private Declare Function sqlite3_soft_heap_limit64 Lib "sqlite3win32.dll" (ByVal n As Currency) As Currency
 Private Declare Function sqlite3_sourceid Lib "sqlite3win32.dll" () As Long
 Private Declare Function sqlite3_sql Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
-'Private Declare Function sqlite3_str_new Lib "sqlite3win32.dll"
-'Private Declare Function sqlite3_str_finish Lib "sqlite3win32.dll"
-'Private Declare Function sqlite3_str_append Lib "sqlite3win32.dll"
-'Private Declare Function sqlite3_str_appendall Lib "sqlite3win32.dll"
-'Private Declare Function sqlite3_str_appendchar Lib "sqlite3win32.dll"
-'Private Declare Function sqlite3_str_reset Lib "sqlite3win32.dll"
-'Private Declare Function sqlite3_str_errcode Lib "sqlite3win32.dll"
-'Private Declare Function sqlite3_str_length Lib "sqlite3win32.dll"
-'Private Declare Function sqlite3_str_value Lib "sqlite3win32.dll"
 Private Declare Function sqlite3_status Lib "sqlite3win32.dll" (ByVal Code As Long, ByVal pCurrent As Long, ByVal pHighwater As Long, ByVal ResetFlag As Long) As Long
 Private Declare Function sqlite3_status64 Lib "sqlite3win32.dll" (ByVal Code As Long, ByVal pCurrent As Long, ByVal pHighwater As Long, ByVal ResetFlag As Long) As Long
 Private Declare Function sqlite3_step Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
@@ -204,6 +195,17 @@ Private Declare Function sqlite3_stmt_busy Lib "sqlite3win32.dll" (ByVal hStmt A
 Private Declare Function sqlite3_stmt_isexplain Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
 Private Declare Function sqlite3_stmt_readonly Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
 Private Declare Function sqlite3_stmt_status Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal Code As Long, ByVal ResetFlag As Long) As Long
+'Private Declare Function sqlite3_str_append Lib "sqlite3win32.dll"
+'Private Declare Function sqlite3_str_appendall Lib "sqlite3win32.dll"
+'Private Declare Function sqlite3_str_appendchar Lib "sqlite3win32.dll"
+'Private Declare Function sqlite3_str_appendf Lib "sqlite3win32.dll"
+'Private Declare Function sqlite3_str_errcode Lib "sqlite3win32.dll"
+'Private Declare Function sqlite3_str_finish Lib "sqlite3win32.dll"
+'Private Declare Function sqlite3_str_length Lib "sqlite3win32.dll"
+'Private Declare Function sqlite3_str_new Lib "sqlite3win32.dll"
+'Private Declare Function sqlite3_str_reset Lib "sqlite3win32.dll"
+'Private Declare Function sqlite3_str_value Lib "sqlite3win32.dll"
+'Private Declare Function sqlite3_str_vappendf Lib "sqlite3win32.dll"
 Private Declare Function sqlite3_strglob Lib "sqlite3win32.dll" (ByVal pzGlobPattern As Long, ByVal pzString As Long) As Long
 Private Declare Function sqlite3_stricmp Lib "sqlite3win32.dll" (ByVal pzLeft As Long, ByVal pzRight As Long) As Long
 Private Declare Function sqlite3_strlike Lib "sqlite3win32.dll" (ByVal pzPattern As Long, ByVal pzStr As Long, ByVal cEsc As Long) As Long
