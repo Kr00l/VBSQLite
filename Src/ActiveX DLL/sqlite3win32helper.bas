@@ -226,6 +226,7 @@ Public Const SQLITE_FCNTL_RESERVE_BYTES As Long = 38
 Public Const SQLITE_FCNTL_CKPT_START As Long = 39
 Public Const SQLITE_FCNTL_EXTERNAL_READER As Long = 40
 Public Const SQLITE_FCNTL_CKSM_FILE As Long = 41
+Public Const SQLITE_FCNTL_RESET_CACHE As Long = 42
 
 ' xAccess VFS Method Flags
 Public Const SQLITE_ACCESS_EXISTS As Long = 0
