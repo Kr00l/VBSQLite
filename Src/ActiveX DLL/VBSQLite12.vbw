@@ -1,12 +1,12 @@
 Common = 12, 214, 1214, 897, C
-sqlite3win32stubs = -1, 54, 1455, 939, C
+sqlite3win32stubs = 16, 117, 1472, 1002, C
 sqlite3win32helper = 22, 29, 1222, 865, C
 SQLiteBase = 149, 146, 1488, 941, C
 SQLiteConnection = 34, 128, 1363, 862, C
-SQLiteDataSet = 148, 51, 1504, 944, C
+SQLiteDataSet = 64, 271, 1420, 1164, C
 SQLiteColumns = 175, 133, 1472, 785, C
 SQLiteColumn = 123, 60, 1241, 919, C
 SQLiteCommand = 346, 79, 1433, 879, C
-SQLiteCursor = 53, 29, 1439, 843, C
+SQLiteCursor = 79, 141, 1241, 890, C
 ISQLiteProgressHandler = 88, 116, 1385, 768, C
 TextCompareOperators = 44, 58, 1341, 710, C
