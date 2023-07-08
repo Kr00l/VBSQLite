@@ -235,10 +235,7 @@ Result = stub_sqlite3_prepare16_v3(PropHandle, StrPtr(SQL), -1, SQLITE_PREPARE_P
 If Result = SQLITE_OK Then
     If stub_sqlite3_stmt_readonly(hStmt) <> 0 Then
         Set CreateCursor = New SQLiteCursor
-        If CreateCursor.FInit(hStmt, Me) = False Then
-            Set CreateCursor = Nothing
-            Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(PropHandle), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(PropHandle))
-        End If
+        CreateCursor.FInit hStmt, Me
     Else
         stub_sqlite3_finalize hStmt
         Err.Raise Number:=5, Description:="SQL statement must be read-only"

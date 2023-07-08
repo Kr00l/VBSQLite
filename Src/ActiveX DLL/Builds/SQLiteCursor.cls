@@ -34,19 +34,12 @@ Set PropDBConnection = Nothing
 Set PropColumns = Nothing
 End Sub
 
-Friend Function FInit(ByVal hStmt As Long, ByVal DBConnection As SQLiteConnection) As Boolean
+Friend Sub FInit(ByVal hStmt As Long, ByVal DBConnection As SQLiteConnection)
 PropHandle = hStmt
 Set PropDBConnection = DBConnection
 PropColumns.FInit Nothing, Me, PropHandle, PropRecordCount(1)
-PropLastResult = stub_sqlite3_step(PropHandle)
-If PropLastResult = SQLITE_ROW Then
-    PropRecordCount(0) = 1
-    PropPosition = 1
-    FInit = True
-ElseIf PropLastResult = SQLITE_DONE Then
-    FInit = True
-End If
-End Function
+PropLastResult = -1
+End Sub
 
 Public Property Get Object() As Object
 Attribute Object.VB_Description = "Returns the own instance."
@@ -70,17 +63,13 @@ End Property
 
 Public Sub ClearParameters()
 Attribute ClearParameters.VB_Description = "Clears all parameter values to null."
-stub_sqlite3_reset PropHandle
-PropRecordCount(0) = 0
-PropPosition = 0
-stub_sqlite3_clear_bindings PropHandle
-PropLastResult = stub_sqlite3_step(PropHandle)
-If PropLastResult = SQLITE_ROW Then
-    PropRecordCount(0) = 1
-    PropPosition = 1
-ElseIf PropLastResult <> SQLITE_DONE Then
-    Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(stub_sqlite3_db_handle(PropHandle)), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(stub_sqlite3_db_handle(PropHandle)))
+If PropLastResult <> -1 Then
+    stub_sqlite3_reset PropHandle
+    PropRecordCount(0) = 0
+    PropPosition = 0
+    PropLastResult = -1
 End If
+stub_sqlite3_clear_bindings PropHandle
 End Sub
 
 Public Function GetParameterCount() As Long
@@ -107,9 +96,12 @@ VT = VarType(Value)
 Dim Result As Long
 Select Case VT
     Case vbDecimal, VT_I8, vbLong, vbInteger, vbByte ' SQLITE_INTEGER
-        stub_sqlite3_reset PropHandle
-        PropRecordCount(0) = 0
-        PropPosition = 0
+        If PropLastResult <> -1 Then
+            stub_sqlite3_reset PropHandle
+            PropRecordCount(0) = 0
+            PropPosition = 0
+            PropLastResult = -1
+        End If
         Dim Int64 As Currency
         Select Case VT
             Case vbDecimal
@@ -122,19 +114,28 @@ Select Case VT
                 Result = stub_sqlite3_bind_int(PropHandle, Index, Value)
         End Select
     Case vbDouble ' SQLITE_FLOAT
-        stub_sqlite3_reset PropHandle
-        PropRecordCount(0) = 0
-        PropPosition = 0
+        If PropLastResult <> -1 Then
+            stub_sqlite3_reset PropHandle
+            PropRecordCount(0) = 0
+            PropPosition = 0
+            PropLastResult = -1
+        End If
         Result = stub_sqlite3_bind_double(PropHandle, Index, Value)
     Case vbString ' SQLITE_TEXT
-        stub_sqlite3_reset PropHandle
-        PropRecordCount(0) = 0
-        PropPosition = 0
+        If PropLastResult <> -1 Then
+            stub_sqlite3_reset PropHandle
+            PropRecordCount(0) = 0
+            PropPosition = 0
+            PropLastResult = -1
+        End If
         Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(Value), -1, SQLITE_TRANSIENT)
     Case vbArray + vbByte ' SQLITE_BLOB
-        stub_sqlite3_reset PropHandle
-        PropRecordCount(0) = 0
-        PropPosition = 0
+        If PropLastResult <> -1 Then
+            stub_sqlite3_reset PropHandle
+            PropRecordCount(0) = 0
+            PropPosition = 0
+            PropLastResult = -1
+        End If
         Dim pArray As Long, pvData As Long
         CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value), 8), 4
         CopyMemory VT, ByVal VarPtr(Value), 2
@@ -146,20 +147,16 @@ Select Case VT
             Result = stub_sqlite3_bind_null(PropHandle, Index)
         End If
     Case vbNull ' SQLITE_NULL
-        stub_sqlite3_reset PropHandle
-        PropRecordCount(0) = 0
-        PropPosition = 0
+        If PropLastResult <> -1 Then
+            stub_sqlite3_reset PropHandle
+            PropRecordCount(0) = 0
+            PropPosition = 0
+            PropLastResult = -1
+        End If
         Result = stub_sqlite3_bind_null(PropHandle, Index)
     Case Else
         Err.Raise 380
 End Select
-PropLastResult = stub_sqlite3_step(PropHandle)
-If PropLastResult = SQLITE_ROW Then
-    PropRecordCount(0) = 1
-    PropPosition = 1
-ElseIf PropLastResult <> SQLITE_DONE Then
-    Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(stub_sqlite3_db_handle(PropHandle)), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(stub_sqlite3_db_handle(PropHandle)))
-End If
 If Result <> SQLITE_OK Then Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(stub_sqlite3_db_handle(PropHandle)), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(stub_sqlite3_db_handle(PropHandle)))
 End Sub
 
@@ -171,11 +168,13 @@ End Property
 
 Public Property Get RecordCount() As Long
 Attribute RecordCount.VB_Description = "Returns the number of records accessed in a SQLiteCursor object."
+If PropLastResult = -1 Then Err.Raise Number:=5, Description:="The Cursor has not been initialized"
 RecordCount = PropRecordCount(0)
 End Property
 
 Public Property Get Position() As Long
 Attribute Position.VB_Description = "Returns the position of the current record."
+If PropLastResult = -1 Then Err.Raise Number:=5, Description:="The Cursor has not been initialized"
 If PropRecordCount(0) > 0 Then
     If PropPosition > PropRecordCount(0) Then
         Position = -3
@@ -191,6 +190,7 @@ End Property
 
 Public Property Get Value(ByVal Col As Long) As Variant
 Attribute Value.VB_Description = "Returns the value contents of the current record."
+If PropLastResult = -1 Then Err.Raise Number:=5, Description:="The Cursor has not been initialized"
 If (Col < 0 Or Col > (PropRecordCount(1) - 1)) Then Err.Raise Number:=381, Description:="Subscript out of range"
 If PropLastResult = SQLITE_ROW Then
     Select Case stub_sqlite3_column_type(PropHandle, Col)
@@ -219,19 +219,24 @@ End Property
 
 Public Property Get BOF() As Boolean
 Attribute BOF.VB_Description = "Returns a value that indicates if the position is before the first record."
+If PropLastResult = -1 Then Err.Raise Number:=5, Description:="The Cursor has not been initialized"
 If PropRecordCount(0) = 0 Or PropPosition < 1 Then BOF = True
 End Property
 
 Public Property Get EOF() As Boolean
 Attribute EOF.VB_Description = "Returns a value that indicates if the position is after the last record."
+If PropLastResult = -1 Then Err.Raise Number:=5, Description:="The Cursor has not been initialized"
 If PropRecordCount(0) = 0 Or PropPosition > PropRecordCount(0) Then EOF = True
 End Property
 
 Public Sub MoveFirst()
 Attribute MoveFirst.VB_Description = "Moves the position to the first record."
-stub_sqlite3_reset PropHandle
-PropRecordCount(0) = 0
-PropPosition = 0
+If PropLastResult <> -1 Then
+    stub_sqlite3_reset PropHandle
+    PropRecordCount(0) = 0
+    PropPosition = 0
+    PropLastResult = -1
+End If
 PropLastResult = stub_sqlite3_step(PropHandle)
 If PropLastResult = SQLITE_ROW Then
     PropRecordCount(0) = 1
@@ -243,6 +248,7 @@ End Sub
 
 Public Sub MoveNext()
 Attribute MoveNext.VB_Description = "Moves the position to the next record."
+If PropLastResult = -1 Then Err.Raise Number:=5, Description:="The Cursor has not been initialized"
 If PropLastResult = SQLITE_ROW Then
     PropLastResult = stub_sqlite3_step(PropHandle)
     Select Case PropLastResult
