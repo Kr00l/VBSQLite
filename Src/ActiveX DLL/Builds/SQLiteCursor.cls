@@ -63,7 +63,7 @@ End Property
 Public Sub ClearParameters()
 Attribute ClearParameters.VB_Description = "Clears all parameter values to null."
 If stub_sqlite3_stmt_status(PropHandle, SQLITE_STMTSTATUS_RUN, 1) > 0 Then
-    stub_sqlite3_reset PropHandle
+    PropLastResult = stub_sqlite3_reset(PropHandle)
     PropRecordCount(0) = 0
     PropPosition = 0
 End If
@@ -95,7 +95,7 @@ Dim Result As Long
 Select Case VT
     Case vbDecimal, VT_I8, vbLong, vbInteger, vbByte ' SQLITE_INTEGER
         If stub_sqlite3_stmt_status(PropHandle, SQLITE_STMTSTATUS_RUN, 1) > 0 Then
-            stub_sqlite3_reset PropHandle
+            PropLastResult = stub_sqlite3_reset(PropHandle)
             PropRecordCount(0) = 0
             PropPosition = 0
         End If
@@ -112,21 +112,21 @@ Select Case VT
         End Select
     Case vbDouble ' SQLITE_FLOAT
         If stub_sqlite3_stmt_status(PropHandle, SQLITE_STMTSTATUS_RUN, 1) > 0 Then
-            stub_sqlite3_reset PropHandle
+            PropLastResult = stub_sqlite3_reset(PropHandle)
             PropRecordCount(0) = 0
             PropPosition = 0
         End If
         Result = stub_sqlite3_bind_double(PropHandle, Index, Value)
     Case vbString ' SQLITE_TEXT
         If stub_sqlite3_stmt_status(PropHandle, SQLITE_STMTSTATUS_RUN, 1) > 0 Then
-            stub_sqlite3_reset PropHandle
+            PropLastResult = stub_sqlite3_reset(PropHandle)
             PropRecordCount(0) = 0
             PropPosition = 0
         End If
         Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(Value), -1, SQLITE_TRANSIENT)
     Case vbArray + vbByte ' SQLITE_BLOB
         If stub_sqlite3_stmt_status(PropHandle, SQLITE_STMTSTATUS_RUN, 1) > 0 Then
-            stub_sqlite3_reset PropHandle
+            PropLastResult = stub_sqlite3_reset(PropHandle)
             PropRecordCount(0) = 0
             PropPosition = 0
         End If
@@ -142,7 +142,7 @@ Select Case VT
         End If
     Case vbNull ' SQLITE_NULL
         If stub_sqlite3_stmt_status(PropHandle, SQLITE_STMTSTATUS_RUN, 1) > 0 Then
-            stub_sqlite3_reset PropHandle
+            PropLastResult = stub_sqlite3_reset(PropHandle)
             PropRecordCount(0) = 0
             PropPosition = 0
         End If
@@ -225,7 +225,7 @@ End Property
 Public Sub MoveFirst()
 Attribute MoveFirst.VB_Description = "Moves the position to the first record."
 If stub_sqlite3_stmt_status(PropHandle, SQLITE_STMTSTATUS_RUN, 1) > 0 Then
-    stub_sqlite3_reset PropHandle
+    PropLastResult = stub_sqlite3_reset(PropHandle)
     PropRecordCount(0) = 0
     PropPosition = 0
 End If
