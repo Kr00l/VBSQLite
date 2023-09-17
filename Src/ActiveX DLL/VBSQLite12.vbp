@@ -1,5 +1,5 @@
 Type=OleDll
-Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\..\..\WINDOWS\system32\stdole2.tlb#OLE Automation
+Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#\\?\C:\Windows\SysWOW64\stdole2.tlb#OLE Automation
 Module=Common; Common\Common.bas
 Module=sqlite3win32stubs; sqlite3win32stubs.bas
 Module=sqlite3win32helper; sqlite3win32helper.bas
@@ -21,8 +21,9 @@ Command32=""
 Name="VBSQLite12"
 HelpContextID="0"
 Description="VB SQLite Library 1.2"
-CompatibleMode="0"
+CompatibleMode="2"
 CompatibleEXE32="Bin\VBSQLite12.DLL"
+VersionCompatible32="1"
 MajorVer=1
 MinorVer=2
 RevisionVer=19
@@ -47,5 +48,5 @@ ThreadingModel=1
 DebugStartupOption=0
 
 [VBCompiler]
-LinkSwitches=KERNEL32.LIB /OPT:NOREF /OPT:NOWIN98
+LinkSwitches=kernel32.lib libvcruntime.lib libucrt.lib /OPT:NOREF /OPT:NOWIN98 /FORCE:MULTIPLE
 LinkBefore=replace_cobj.bat
