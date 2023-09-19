@@ -193,7 +193,6 @@ Private Declare Function sqlite3_status Lib "sqlite3win32.dll" (ByVal Code As Lo
 Private Declare Function sqlite3_status64 Lib "sqlite3win32.dll" (ByVal Code As Long, ByVal pCurrent As Long, ByVal pHighwater As Long, ByVal ResetFlag As Long) As Long
 Private Declare Function sqlite3_step Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
 Private Declare Function sqlite3_stmt_busy Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
-Private Declare Function sqlite3_stmt_explain Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal eMode As Long) As Long
 Private Declare Function sqlite3_stmt_isexplain Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
 Private Declare Function sqlite3_stmt_readonly Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
 Private Declare Function sqlite3_stmt_status Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal Code As Long, ByVal ResetFlag As Long) As Long
@@ -1040,10 +1039,6 @@ End Function
 
 Public Function stub_sqlite3_stmt_busy(ByVal hStmt As Long) As Long
 stub_sqlite3_stmt_busy = sqlite3_stmt_busy(hStmt)
-End Function
-
-Public Function stub_sqlite3_stmt_explain(ByVal hStmt As Long, ByVal eMode As Long) As Long
-stub_sqlite3_stmt_explain = sqlite3_stmt_explain(hStmt, eMode)
 End Function
 
 Public Function stub_sqlite3_stmt_isexplain(ByVal hStmt As Long) As Long
