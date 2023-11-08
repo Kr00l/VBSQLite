@@ -196,18 +196,13 @@ If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be 
 Dim hStmt As Long, Result As Long
 Result = stub_sqlite3_prepare16_v2(PropHandle, StrPtr(SQL), -1, hStmt, 0)
 If Result = SQLITE_OK Then
-    If stub_sqlite3_stmt_readonly(hStmt) <> 0 Then
-        Dim NewDataSet As New SQLiteDataSet
-        If NewDataSet.FInit(hStmt) = True Then
-            stub_sqlite3_finalize hStmt
-            Set OpenDataSet = NewDataSet
-        Else
-            stub_sqlite3_finalize hStmt
-            Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(PropHandle), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(PropHandle))
-        End If
+    Dim NewDataSet As New SQLiteDataSet
+    If NewDataSet.FInit(hStmt) = True Then
+        stub_sqlite3_finalize hStmt
+        Set OpenDataSet = NewDataSet
     Else
         stub_sqlite3_finalize hStmt
-        Err.Raise Number:=5, Description:="SQL statement must be read-only"
+        Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(PropHandle), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(PropHandle))
     End If
 Else
     Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(PropHandle), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(PropHandle))
@@ -233,13 +228,8 @@ If PropHandle = 0 Then Err.Raise Number:=5, Description:="DB connection must be 
 Dim hStmt As Long, Result As Long
 Result = stub_sqlite3_prepare16_v3(PropHandle, StrPtr(SQL), -1, SQLITE_PREPARE_PERSISTENT, hStmt, 0)
 If Result = SQLITE_OK Then
-    If stub_sqlite3_stmt_readonly(hStmt) <> 0 Then
-        Set CreateCursor = New SQLiteCursor
-        CreateCursor.FInit hStmt, Me
-    Else
-        stub_sqlite3_finalize hStmt
-        Err.Raise Number:=5, Description:="SQL statement must be read-only"
-    End If
+    Set CreateCursor = New SQLiteCursor
+    CreateCursor.FInit hStmt, Me
 Else
     Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(PropHandle), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(PropHandle))
 End If
