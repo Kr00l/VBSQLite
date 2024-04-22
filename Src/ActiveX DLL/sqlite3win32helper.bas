@@ -155,6 +155,7 @@ Public Const SQLITE_DETERMINISTIC As Long = &H800
 Public Const SQLITE_DIRECTONLY As Long = &H80000
 Public Const SQLITE_SUBTYPE As Long = &H100000
 Public Const SQLITE_INNOCUOUS As Long = &H200000
+Public Const SQLITE_RESULT_SUBTYPE As Long = &H1000000
 
 ' Device Characteristics
 Public Const SQLITE_IOCAP_ATOMIC As Long = &H1
