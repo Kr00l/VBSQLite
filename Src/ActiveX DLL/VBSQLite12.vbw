@@ -1,7 +1,7 @@
 Common = 12, 214, 1214, 897, C
-sqlite3win32stubs = 16, 117, 1472, 1002, C
+sqlite3win32stubs = 111, 23, 1280, 908, C
 sqlite3win32helper = 22, 29, 1222, 865, C
-SQLiteBase = 149, 146, 1488, 941, C
+SQLiteBase = 64, 150, 1403, 945, C
 SQLiteConnection = 34, 128, 1363, 862, C
 SQLiteDataSet = 64, 271, 1420, 1164, C
 SQLiteColumns = 175, 133, 1472, 785, C
