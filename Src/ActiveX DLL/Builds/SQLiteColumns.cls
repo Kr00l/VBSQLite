@@ -12,6 +12,18 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
+#If (VBA7 = 0) Then
+Private Enum LongPtr
+[_]
+End Enum
+#End If
+#If Win64 Then
+Private Const NULL_PTR As LongPtr = 0
+Private Const PTR_SIZE As Long = 8
+#Else
+Private Const NULL_PTR As Long = 0
+Private Const PTR_SIZE As Long = 4
+#End If
 Private PropColumn As Collection
 
 Private Sub Class_Initialize()
@@ -28,10 +40,14 @@ Attribute NewEnum.VB_MemberFlags = "40"
 Set NewEnum = PropColumn.[_NewEnum]
 End Function
 
+#If VBA7 Then
+Friend Sub FInit(ByVal DataSet As SQLiteDataSet, ByVal Cursor As SQLiteCursor, ByVal hStmt As LongPtr, ByRef Count As Long)
+#Else
 Friend Sub FInit(ByVal DataSet As SQLiteDataSet, ByVal Cursor As SQLiteCursor, ByVal hStmt As Long, ByRef Count As Long)
+#End If
 Count = stub_sqlite3_column_count(hStmt)
 If Count > 0 Then
-    Dim ObjectPointer_0 As Long, ObjectPointer_1 As Long
+    Dim ObjectPointer_0 As LongPtr, ObjectPointer_1 As LongPtr
     ObjectPointer_0 = ObjPtr(DataSet)
     ObjectPointer_1 = ObjPtr(Cursor)
     Dim iCol As Long, Item As SQLiteColumn, ErrValue As Long
@@ -41,7 +57,7 @@ If Count > 0 Then
         Key = vbNullString
         Key_Ext = vbNullString
         Key_Cnt = 0
-        Item.FInit 0, 0, 0, Key, hStmt, iCol
+        Item.FInit NULL_PTR, NULL_PTR, 0, Key, hStmt, iCol
         On Error Resume Next
         PropColumn.Add Item, Key
         ErrValue = Err.Number
@@ -56,7 +72,7 @@ If Count > 0 Then
             Key = Key_Ext
             PropColumn.Add Item, Key
         End If
-        Item.FInit ObjectPointer_0, ObjectPointer_1, iCol + 1, Key, 0, -1
+        Item.FInit ObjectPointer_0, ObjectPointer_1, iCol + 1, Key, NULL_PTR, -1
     Next iCol
 End If
 End Sub

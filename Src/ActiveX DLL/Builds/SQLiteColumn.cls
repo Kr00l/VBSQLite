@@ -12,7 +12,19 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
-Private ShadowObjectPointer_0 As Long, ShadowObjectPointer_1 As Long
+#If (VBA7 = 0) Then
+Private Enum LongPtr
+[_]
+End Enum
+#End If
+#If Win64 Then
+Private Const NULL_PTR As LongPtr = 0
+Private Const PTR_SIZE As Long = 8
+#Else
+Private Const NULL_PTR As Long = 0
+Private Const PTR_SIZE As Long = 4
+#End If
+Private ShadowObjectPointer_0 As LongPtr, ShadowObjectPointer_1 As LongPtr
 Private PropIndex As Long, PropKey As String
 Private PropName As String
 Private PropTypeName As String
@@ -28,8 +40,12 @@ Private Function ShadowCursor() As SQLiteCursor
 Set ShadowCursor = PtrToObj(ShadowObjectPointer_1)
 End Function
 
+#If VBA7 Then
+Friend Sub FInit(ByVal ObjectPointer_0 As LongPtr, ByVal ObjectPointer_1 As LongPtr, ByVal Index As Long, ByRef Key As String, ByVal hStmt As LongPtr, ByVal iCol As Long)
+#Else
 Friend Sub FInit(ByVal ObjectPointer_0 As Long, ByVal ObjectPointer_1 As Long, ByVal Index As Long, ByRef Key As String, ByVal hStmt As Long, ByVal iCol As Long)
-If hStmt <> 0 And iCol > -1 Then
+#End If
+If hStmt <> NULL_PTR And iCol > -1 Then
     PropName = SQLiteUTF8PtrToStr(stub_sqlite3_column_name(hStmt, iCol))
     PropTypeName = SQLiteUTF8PtrToStr(stub_sqlite3_column_decltype(hStmt, iCol))
     PropOriginalName = SQLiteUTF8PtrToStr(stub_sqlite3_column_origin_name(hStmt, iCol))
@@ -57,7 +73,7 @@ End Property
 Public Property Get Value() As Variant
 Attribute Value.VB_Description = "Returns the value of the column item from the current record."
 Attribute Value.VB_UserMemId = 0
-If ShadowObjectPointer_0 <> 0 Then
+If ShadowObjectPointer_0 <> NULL_PTR Then
     Dim Row As Long
     Row = ShadowDataSet.Position - 1
     If Row > -1 Then

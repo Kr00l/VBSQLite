@@ -12,12 +12,30 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
+#If (VBA7 = 0) Then
+Private Enum LongPtr
+[_]
+End Enum
+#End If
+#If Win64 Then
+Private Const NULL_PTR As LongPtr = 0
+Private Const PTR_SIZE As Long = 8
+#Else
+Private Const NULL_PTR As Long = 0
+Private Const PTR_SIZE As Long = 4
+#End If
+#If VBA7 Then
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
+Private Declare PtrSafe Function VarI8FromDec Lib "oleaut32" (ByRef iDecIn As Variant, ByRef i64Out As Currency) As Long
+Private Declare PtrSafe Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
+#Else
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare Function VarI8FromDec Lib "oleaut32" (ByRef iDecIn As Variant, ByRef i64Out As Currency) As Long
 Private Declare Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
+#End If
 Private Const VT_BYREF As Integer = &H4000
 Private Const VT_I8 As Integer = &H14
-Private PropHandle As Long
+Private PropHandle As LongPtr
 Private PropDBConnection As SQLiteConnection
 Private PropColumns As SQLiteColumns
 Private PropLastResult As Long
@@ -34,7 +52,11 @@ Set PropDBConnection = Nothing
 Set PropColumns = Nothing
 End Sub
 
+#If VBA7 Then
+Friend Sub FInit(ByVal hStmt As LongPtr, ByVal DBConnection As SQLiteConnection)
+#Else
 Friend Sub FInit(ByVal hStmt As Long, ByVal DBConnection As SQLiteConnection)
+#End If
 PropHandle = hStmt
 Set PropDBConnection = DBConnection
 PropColumns.FInit Nothing, Me, PropHandle, PropRecordCount(1)
@@ -45,8 +67,13 @@ Attribute Object.VB_Description = "Returns the own instance."
 Set Object = Me
 End Property
 
+#If VBA7 Then
+Public Property Get hStmt() As LongPtr
+Attribute hStmt.VB_Description = "Returns a SQLite statement handle."
+#Else
 Public Property Get hStmt() As Long
 Attribute hStmt.VB_Description = "Returns a SQLite statement handle."
+#End If
 hStmt = PropHandle
 End Property
 
@@ -130,12 +157,12 @@ Select Case VT
             PropRecordCount(0) = 0
             PropPosition = 0
         End If
-        Dim pArray As Long, pvData As Long
-        CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value), 8), 4
+        Dim pArray As LongPtr, pvData As LongPtr
+        CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value), 8), PTR_SIZE
         CopyMemory VT, ByVal VarPtr(Value), 2
-        If (VT And VT_BYREF) = VT_BYREF Then CopyMemory pArray, ByVal pArray, 4
-        If pArray <> 0 Then CopyMemory pvData, ByVal UnsignedAdd(pArray, 12), 4
-        If pvData <> 0 Then
+        If (VT And VT_BYREF) = VT_BYREF Then CopyMemory pArray, ByVal pArray, PTR_SIZE
+        If pArray <> NULL_PTR Then CopyMemory pvData, ByVal UnsignedAdd(pArray, 12), PTR_SIZE
+        If pvData <> NULL_PTR Then
             Result = stub_sqlite3_bind_blob(PropHandle, Index, pvData, LenB(Value), SQLITE_TRANSIENT)
         Else
             Result = stub_sqlite3_bind_null(PropHandle, Index)

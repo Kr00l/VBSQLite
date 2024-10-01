@@ -12,6 +12,18 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
+#If (VBA7 = 0) Then
+Private Enum LongPtr
+[_]
+End Enum
+#End If
+#If Win64 Then
+Private Const NULL_PTR As LongPtr = 0
+Private Const PTR_SIZE As Long = 8
+#Else
+Private Const NULL_PTR As Long = 0
+Private Const PTR_SIZE As Long = 4
+#End If
 Private Const ARR_BUMP As Long = 10
 Private Type TCOLS
 Cols() As Variant
@@ -19,7 +31,11 @@ End Type
 Private Type TRECORDS
 Rows() As TCOLS
 End Type
+#If VBA7 Then
+Private Declare PtrSafe Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
+#Else
 Private Declare Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
+#End If
 Private PropColumns As SQLiteColumns
 Private PropValues As TRECORDS
 Private PropRecordCount(0 To 1) As Long
@@ -33,7 +49,11 @@ Private Sub Class_Terminate()
 Set PropColumns = Nothing
 End Sub
 
+#If VBA7 Then
+Friend Function FInit(ByVal hStmt As LongPtr) As Boolean
+#Else
 Friend Function FInit(ByVal hStmt As Long) As Boolean
+#End If
 Dim Result As Long, ArrUBound As Long, Count As Long, iCol As Long
 Dim Int64 As Currency
 Result = stub_sqlite3_step(hStmt)

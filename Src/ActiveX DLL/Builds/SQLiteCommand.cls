@@ -12,11 +12,28 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
+#If (VBA7 = 0) Then
+Private Enum LongPtr
+[_]
+End Enum
+#End If
+#If Win64 Then
+Private Const NULL_PTR As LongPtr = 0
+Private Const PTR_SIZE As Long = 8
+#Else
+Private Const NULL_PTR As Long = 0
+Private Const PTR_SIZE As Long = 4
+#End If
+#If VBA7 Then
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
+Private Declare PtrSafe Function VarI8FromDec Lib "oleaut32" (ByRef iDecIn As Variant, ByRef i64Out As Currency) As Long
+#Else
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare Function VarI8FromDec Lib "oleaut32" (ByRef iDecIn As Variant, ByRef i64Out As Currency) As Long
+#End If
 Private Const VT_BYREF As Integer = &H4000
 Private Const VT_I8 As Integer = &H14
-Private PropHandle As Long
+Private PropHandle As LongPtr
 Private PropDBConnection As SQLiteConnection
 
 Private Sub Class_Terminate()
@@ -24,7 +41,11 @@ stub_sqlite3_finalize PropHandle
 Set PropDBConnection = Nothing
 End Sub
 
+#If VBA7 Then
+Friend Sub FInit(ByVal hStmt As LongPtr, ByVal DBConnection As SQLiteConnection)
+#Else
 Friend Sub FInit(ByVal hStmt As Long, ByVal DBConnection As SQLiteConnection)
+#End If
 PropHandle = hStmt
 Set PropDBConnection = DBConnection
 End Sub
@@ -34,8 +55,13 @@ Attribute Object.VB_Description = "Returns the own instance."
 Set Object = Me
 End Property
 
+#If VBA7 Then
+Public Property Get hStmt() As LongPtr
+Attribute hStmt.VB_Description = "Returns a SQLite statement handle."
+#Else
 Public Property Get hStmt() As Long
 Attribute hStmt.VB_Description = "Returns a SQLite statement handle."
+#End If
 hStmt = PropHandle
 End Property
 
@@ -95,12 +121,12 @@ Select Case VT
     Case vbString ' SQLITE_TEXT
         Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(Value), -1, SQLITE_TRANSIENT)
     Case vbArray + vbByte ' SQLITE_BLOB
-        Dim pArray As Long, pvData As Long
-        CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value), 8), 4
+        Dim pArray As LongPtr, pvData As LongPtr
+        CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value), 8), PTR_SIZE
         CopyMemory VT, ByVal VarPtr(Value), 2
-        If (VT And VT_BYREF) = VT_BYREF Then CopyMemory pArray, ByVal pArray, 4
-        If pArray <> 0 Then CopyMemory pvData, ByVal UnsignedAdd(pArray, 12), 4
-        If pvData <> 0 Then
+        If (VT And VT_BYREF) = VT_BYREF Then CopyMemory pArray, ByVal pArray, PTR_SIZE
+        If pArray <> NULL_PTR Then CopyMemory pvData, ByVal UnsignedAdd(pArray, 12), PTR_SIZE
+        If pvData <> NULL_PTR Then
             Result = stub_sqlite3_bind_blob(PropHandle, Index, pvData, LenB(Value), SQLITE_TRANSIENT)
         Else
             Result = stub_sqlite3_bind_null(PropHandle, Index)
@@ -133,11 +159,11 @@ End Function
 
 Public Function CreateCursor() As SQLiteCursor
 Attribute CreateCursor.VB_Description = "Creates an expanded SQL query and returns a reference to a SQLiteCursor object."
-Dim Ptr As Long
+Dim Ptr As LongPtr
 Ptr = stub_sqlite3_expanded_sql(PropHandle)
-If Ptr <> 0 Then
-    Dim hStmt As Long, Result As Long
-    Result = stub_sqlite3_prepare_v3(stub_sqlite3_db_handle(PropHandle), Ptr, -1, SQLITE_PREPARE_PERSISTENT, hStmt, 0)
+If Ptr <> NULL_PTR Then
+    Dim hStmt As LongPtr, Result As Long
+    Result = stub_sqlite3_prepare_v3(stub_sqlite3_db_handle(PropHandle), Ptr, -1, SQLITE_PREPARE_PERSISTENT, hStmt, NULL_PTR)
     stub_sqlite3_free Ptr
     If Result = SQLITE_OK Then
         Set CreateCursor = New SQLiteCursor
