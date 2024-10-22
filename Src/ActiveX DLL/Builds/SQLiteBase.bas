@@ -80,7 +80,7 @@ If cArg = 1 Then
         End If
         stub_sqlite3_result_text16 pCtx, StrPtr(Text), -1, SQLITE_TRANSIENT
     Else
-        stub_sqlite3_result_text16 pCtx, NULL_PTR, 0, SQLITE_STATIC
+        stub_sqlite3_result_text16 pCtx, StrPtr(""), 0, SQLITE_TRANSIENT
     End If
 End If
 End Function

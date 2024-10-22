@@ -150,7 +150,11 @@ Select Case VT
             PropRecordCount(0) = 0
             PropPosition = 0
         End If
-        Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(Value), -1, SQLITE_TRANSIENT)
+        If StrPtr(Value) <> NULL_PTR Then
+            Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(Value), -1, SQLITE_TRANSIENT)
+        Else
+            Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(""), 0, SQLITE_TRANSIENT)
+        End If
     Case vbArray + vbByte ' SQLITE_BLOB
         If stub_sqlite3_stmt_status(PropHandle, SQLITE_STMTSTATUS_RUN, 1) > 0 Then
             PropLastResult = stub_sqlite3_reset(PropHandle)
