@@ -117,6 +117,89 @@ SQLiteFunctionNoCaseCollating = StrComp(SQLiteUTF8PtrToStr(pKey1, nKey1), SQLite
 End Function
 
 #If VBA7 Then
+Public Sub SQLiteCreateFunctions(ByVal hDB As LongPtr)
+#Else
+Public Sub SQLiteCreateFunctions(ByVal hDB As Long)
+#End If
+Dim STR_JULIANDAYFROMOADATE(0 To 19) As Byte
+STR_JULIANDAYFROMOADATE(0) = &H6A: STR_JULIANDAYFROMOADATE(1) = &H75: STR_JULIANDAYFROMOADATE(2) = &H6C
+STR_JULIANDAYFROMOADATE(3) = &H69: STR_JULIANDAYFROMOADATE(4) = &H61: STR_JULIANDAYFROMOADATE(5) = &H6E
+STR_JULIANDAYFROMOADATE(6) = &H64: STR_JULIANDAYFROMOADATE(7) = &H61: STR_JULIANDAYFROMOADATE(8) = &H79
+STR_JULIANDAYFROMOADATE(9) = &H66: STR_JULIANDAYFROMOADATE(10) = &H72: STR_JULIANDAYFROMOADATE(11) = &H6F
+STR_JULIANDAYFROMOADATE(12) = &H6D: STR_JULIANDAYFROMOADATE(13) = &H6F: STR_JULIANDAYFROMOADATE(14) = &H61
+STR_JULIANDAYFROMOADATE(15) = &H64: STR_JULIANDAYFROMOADATE(16) = &H61: STR_JULIANDAYFROMOADATE(17) = &H74
+STR_JULIANDAYFROMOADATE(18) = &H65: STR_JULIANDAYFROMOADATE(19) = &H0
+Dim STR_JULIANDAYTOOADATE(0 To 17) As Byte
+STR_JULIANDAYTOOADATE(0) = &H6A: STR_JULIANDAYTOOADATE(1) = &H75: STR_JULIANDAYTOOADATE(2) = &H6C
+STR_JULIANDAYTOOADATE(3) = &H69: STR_JULIANDAYTOOADATE(4) = &H61: STR_JULIANDAYTOOADATE(5) = &H6E
+STR_JULIANDAYTOOADATE(6) = &H64: STR_JULIANDAYTOOADATE(7) = &H61: STR_JULIANDAYTOOADATE(8) = &H79
+STR_JULIANDAYTOOADATE(9) = &H74: STR_JULIANDAYTOOADATE(10) = &H6F: STR_JULIANDAYTOOADATE(11) = &H6F
+STR_JULIANDAYTOOADATE(12) = &H61: STR_JULIANDAYTOOADATE(13) = &H64: STR_JULIANDAYTOOADATE(14) = &H61
+STR_JULIANDAYTOOADATE(15) = &H74: STR_JULIANDAYTOOADATE(16) = &H65: STR_JULIANDAYTOOADATE(17) = &H0
+If hDB <> NULL_PTR Then
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_JULIANDAYFROMOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionJulianDayFromOADate, NULL_PTR, NULL_PTR, NULL_PTR
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_JULIANDAYTOOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionJulianDayToOADate, NULL_PTR, NULL_PTR, NULL_PTR
+End If
+End Sub
+
+#If VBA7 Then
+Public Function SQLiteFunctionJulianDayFromOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionJulianDayFromOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
+#End If
+If cArg = 1 Then
+    Dim pValue As LongPtr
+    CopyMemory pValue, ByVal pArgValue, PTR_SIZE
+    Select Case stub_sqlite3_value_type(pValue)
+        Case SQLITE_INTEGER, SQLITE_FLOAT
+            Dim OADate As Double
+            OADate = stub_sqlite3_value_double(pValue)
+            If OADate >= 0# Then
+                stub_sqlite3_result_double pCtx, OADate + JULIANDAY_OFFSET
+            Else
+                Dim Temp As Double
+                Temp = -Int(-OADate)
+                stub_sqlite3_result_double pCtx, Temp - (OADate - Temp) + JULIANDAY_OFFSET
+            End If
+        Case Else
+            stub_sqlite3_result_null pCtx
+    End Select
+End If
+End Function
+
+#If VBA7 Then
+Public Function SQLiteFunctionJulianDayToOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionJulianDayToOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
+#End If
+If cArg = 1 Then
+    Dim pValue As LongPtr
+    CopyMemory pValue, ByVal pArgValue, PTR_SIZE
+    Select Case stub_sqlite3_value_type(pValue)
+        Case SQLITE_INTEGER, SQLITE_FLOAT
+            Dim JulianDay As Double
+            JulianDay = stub_sqlite3_value_double(pValue)
+            Const MIN_DATE As Double = -657434# + JULIANDAY_OFFSET ' 01/01/0100
+            Const MAX_DATE As Double = 2958465# + JULIANDAY_OFFSET ' 12/31/9999
+            If JulianDay >= MIN_DATE And JulianDay <= MAX_DATE Then
+                If JulianDay >= JULIANDAY_OFFSET Then
+                    stub_sqlite3_result_double pCtx, JulianDay - JULIANDAY_OFFSET
+                Else
+                    Dim DateValue As Double, Temp As Double
+                    DateValue = JulianDay - JULIANDAY_OFFSET
+                    Temp = Int(DateValue)
+                    stub_sqlite3_result_double pCtx, Temp + (Temp - DateValue)
+                End If
+            Else
+                stub_sqlite3_result_null pCtx
+            End If
+        Case Else
+            stub_sqlite3_result_null pCtx
+    End Select
+End If
+End Function
+
+#If VBA7 Then
 Public Function SQLiteProgressHandlerCallback CDecl(ByVal pArg As ISQLiteProgressHandler) As Long
 #Else
 Public Function SQLiteProgressHandlerCallback(ByVal pArg As ISQLiteProgressHandler) As Long
@@ -170,29 +253,5 @@ If Ptr <> NULL_PTR Then
         SQLiteUTF16PtrToStr = Space$(Size)
         CopyMemory ByVal StrPtr(SQLiteUTF16PtrToStr), ByVal Ptr, Size * 2
     End If
-End If
-End Function
-
-Public Function CDateToJulianDay(ByVal DateValue As Date) As Double
-If CDbl(DateValue) >= 0 Then
-    CDateToJulianDay = CDbl(DateValue) + JULIANDAY_OFFSET
-Else
-    Dim Temp As Double
-    Temp = -Int(-CDbl(DateValue))
-    CDateToJulianDay = Temp - (CDbl(DateValue) - Temp) + JULIANDAY_OFFSET
-End If
-End Function
-
-Public Function CJulianDayToDate(ByVal JulianDay As Double) As Date
-Const MIN_DATE As Double = -657434# + JULIANDAY_OFFSET ' 01/01/0100
-Const MAX_DATE As Double = 2958465# + JULIANDAY_OFFSET ' 12/31/9999
-If JulianDay < MIN_DATE Or JulianDay > MAX_DATE Then Exit Function
-If JulianDay >= JULIANDAY_OFFSET Then
-    CJulianDayToDate = CDate(JulianDay - JULIANDAY_OFFSET)
-Else
-    Dim DateDbl As Double, Temp As Double
-    DateDbl = JulianDay - JULIANDAY_OFFSET
-    Temp = Int(DateDbl)
-    CJulianDayToDate = CDate(Temp + (Temp - DateDbl))
 End If
 End Function

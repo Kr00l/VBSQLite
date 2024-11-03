@@ -113,6 +113,7 @@ Select Case Mode
         Else
             stub_sqlite3_regexp_init PropHandle, NULL_PTR, NULL_PTR
             Call SQLiteOverloadBuiltinFunctions(PropHandle)
+            Call SQLiteCreateFunctions(PropHandle)
         End If
     Case Else
         Err.Raise 380
