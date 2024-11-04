@@ -25,6 +25,7 @@ Private Declare Function MultiByteToWideChar Lib "kernel32" (ByVal CodePage As L
 #End If
 Private Const CP_UTF8 As Long = 65001
 Private Const JULIANDAY_OFFSET As Double = 2415018.5
+Private Const UNIXEPOCH_OFFSET As Double = 25569#
 Private Const MEM_COMMIT As Long = &H1000
 Private Const MEM_RELEASE As Long = &H8000&
 Private Const PAGE_EXECUTE_READWRITE As Long = &H40
@@ -121,24 +122,22 @@ Public Sub SQLiteCreateFunctions(ByVal hDB As LongPtr)
 #Else
 Public Sub SQLiteCreateFunctions(ByVal hDB As Long)
 #End If
-Dim STR_JULIANDAYFROMOADATE(0 To 19) As Byte
-STR_JULIANDAYFROMOADATE(0) = &H6A: STR_JULIANDAYFROMOADATE(1) = &H75: STR_JULIANDAYFROMOADATE(2) = &H6C
-STR_JULIANDAYFROMOADATE(3) = &H69: STR_JULIANDAYFROMOADATE(4) = &H61: STR_JULIANDAYFROMOADATE(5) = &H6E
-STR_JULIANDAYFROMOADATE(6) = &H64: STR_JULIANDAYFROMOADATE(7) = &H61: STR_JULIANDAYFROMOADATE(8) = &H79
-STR_JULIANDAYFROMOADATE(9) = &H66: STR_JULIANDAYFROMOADATE(10) = &H72: STR_JULIANDAYFROMOADATE(11) = &H6F
-STR_JULIANDAYFROMOADATE(12) = &H6D: STR_JULIANDAYFROMOADATE(13) = &H6F: STR_JULIANDAYFROMOADATE(14) = &H61
-STR_JULIANDAYFROMOADATE(15) = &H64: STR_JULIANDAYFROMOADATE(16) = &H61: STR_JULIANDAYFROMOADATE(17) = &H74
-STR_JULIANDAYFROMOADATE(18) = &H65: STR_JULIANDAYFROMOADATE(19) = &H0
-Dim STR_JULIANDAYTOOADATE(0 To 17) As Byte
-STR_JULIANDAYTOOADATE(0) = &H6A: STR_JULIANDAYTOOADATE(1) = &H75: STR_JULIANDAYTOOADATE(2) = &H6C
-STR_JULIANDAYTOOADATE(3) = &H69: STR_JULIANDAYTOOADATE(4) = &H61: STR_JULIANDAYTOOADATE(5) = &H6E
-STR_JULIANDAYTOOADATE(6) = &H64: STR_JULIANDAYTOOADATE(7) = &H61: STR_JULIANDAYTOOADATE(8) = &H79
-STR_JULIANDAYTOOADATE(9) = &H74: STR_JULIANDAYTOOADATE(10) = &H6F: STR_JULIANDAYTOOADATE(11) = &H6F
-STR_JULIANDAYTOOADATE(12) = &H61: STR_JULIANDAYTOOADATE(13) = &H64: STR_JULIANDAYTOOADATE(14) = &H61
-STR_JULIANDAYTOOADATE(15) = &H74: STR_JULIANDAYTOOADATE(16) = &H65: STR_JULIANDAYTOOADATE(17) = &H0
+Dim STR_JULIANDAYFROMOADATE(0 To 2) As Currency, STR_JULIANDAYTOOADATE(0 To 2) As Currency
+STR_JULIANDAYFROMOADATE(0) = 701785548400967.409@: STR_JULIANDAYFROMOADATE(1) = 723318499234561.3945@: STR_JULIANDAYFROMOADATE(2) = 664.8929@
+STR_JULIANDAYTOOADATE(0) = 701785548400967.409@: STR_JULIANDAYTOOADATE(1) = 838609435078475.4809@: STR_JULIANDAYTOOADATE(2) = 0.0101@
+Dim STR_UNIXEPOCHFROMOADATE(0 To 2) As Currency, STR_UNIXEPOCHTOOADATE(0 To 2) As Currency
+STR_UNIXEPOCHFROMOADATE(0) = 716506911328393.1765@: STR_UNIXEPOCHFROMOADATE(1) = 723318499234561.3928@: STR_UNIXEPOCHFROMOADATE(2) = 664.8929@
+STR_UNIXEPOCHTOOADATE(0) = 716506911328393.1765@: STR_UNIXEPOCHTOOADATE(1) = 838609435078475.4792@: STR_UNIXEPOCHTOOADATE(2) = 0.0101@
+Dim STR_UNIXEPOCHMSFROMOADATE(0 To 2) As Currency, STR_UNIXEPOCHMSTOOADATE(0 To 2) As Currency
+STR_UNIXEPOCHMSFROMOADATE(0) = 716506911328393.1765@: STR_UNIXEPOCHMSFROMOADATE(1) = 802919624780725.796@: STR_UNIXEPOCHMSFROMOADATE(2) = 43574423.6641@
+STR_UNIXEPOCHMSTOOADATE(0) = 716506911328393.1765@: STR_UNIXEPOCHMSTOOADATE(1) = 723318500101950.1928@: STR_UNIXEPOCHMSTOOADATE(2) = 664.8929@
 If hDB <> NULL_PTR Then
     stub_sqlite3_create_function_v2 hDB, VarPtr(STR_JULIANDAYFROMOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionJulianDayFromOADate, NULL_PTR, NULL_PTR, NULL_PTR
     stub_sqlite3_create_function_v2 hDB, VarPtr(STR_JULIANDAYTOOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionJulianDayToOADate, NULL_PTR, NULL_PTR, NULL_PTR
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHFROMOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochFromOADate, NULL_PTR, NULL_PTR, NULL_PTR
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHTOOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochToOADate, NULL_PTR, NULL_PTR, NULL_PTR
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHMSFROMOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochMsFromOADate, NULL_PTR, NULL_PTR, NULL_PTR
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHMSTOOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochMsToOADate, NULL_PTR, NULL_PTR, NULL_PTR
 End If
 End Sub
 
@@ -193,6 +192,82 @@ If cArg = 1 Then
             Else
                 stub_sqlite3_result_null pCtx
             End If
+        Case Else
+            stub_sqlite3_result_null pCtx
+    End Select
+End If
+End Function
+
+#If VBA7 Then
+Public Function SQLiteFunctionUnixEpochFromOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionUnixEpochFromOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
+#End If
+If cArg = 1 Then
+    Dim pValue As LongPtr
+    CopyMemory pValue, ByVal pArgValue, PTR_SIZE
+    Select Case stub_sqlite3_value_type(pValue)
+        Case SQLITE_INTEGER, SQLITE_FLOAT
+            Dim OADate As Double
+            OADate = stub_sqlite3_value_double(pValue)
+            stub_sqlite3_result_int64 pCtx, ((OADate - UNIXEPOCH_OFFSET) * 86400#) / 10000@
+        Case Else
+            stub_sqlite3_result_null pCtx
+    End Select
+End If
+End Function
+
+#If VBA7 Then
+Public Function SQLiteFunctionUnixEpochToOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionUnixEpochToOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
+#End If
+If cArg = 1 Then
+    Dim pValue As LongPtr
+    CopyMemory pValue, ByVal pArgValue, PTR_SIZE
+    Select Case stub_sqlite3_value_type(pValue)
+        Case SQLITE_INTEGER, SQLITE_FLOAT
+            Dim UnixEpoch As Currency
+            UnixEpoch = stub_sqlite3_value_int64(pValue) * 10000@
+            stub_sqlite3_result_double pCtx, (UnixEpoch / 86400#) + UNIXEPOCH_OFFSET
+        Case Else
+            stub_sqlite3_result_null pCtx
+    End Select
+End If
+End Function
+
+#If VBA7 Then
+Public Function SQLiteFunctionUnixEpochMsFromOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionUnixEpochMsFromOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
+#End If
+If cArg = 1 Then
+    Dim pValue As LongPtr
+    CopyMemory pValue, ByVal pArgValue, PTR_SIZE
+    Select Case stub_sqlite3_value_type(pValue)
+        Case SQLITE_INTEGER, SQLITE_FLOAT
+            Dim OADate As Double
+            OADate = stub_sqlite3_value_double(pValue)
+            stub_sqlite3_result_double pCtx, (OADate - UNIXEPOCH_OFFSET) * 86400#
+        Case Else
+            stub_sqlite3_result_null pCtx
+    End Select
+End If
+End Function
+
+#If VBA7 Then
+Public Function SQLiteFunctionUnixEpochMsToOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionUnixEpochMsToOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
+#End If
+If cArg = 1 Then
+    Dim pValue As LongPtr
+    CopyMemory pValue, ByVal pArgValue, PTR_SIZE
+    Select Case stub_sqlite3_value_type(pValue)
+        Case SQLITE_INTEGER, SQLITE_FLOAT
+            Dim UnixEpoch As Double
+            UnixEpoch = stub_sqlite3_value_double(pValue)
+            stub_sqlite3_result_double pCtx, (UnixEpoch / 86400#) + UNIXEPOCH_OFFSET
         Case Else
             stub_sqlite3_result_null pCtx
     End Select
