@@ -153,12 +153,16 @@ If cArg = 1 Then
         Case SQLITE_INTEGER, SQLITE_FLOAT
             Dim OADate As Double
             OADate = stub_sqlite3_value_double(pValue)
-            If OADate >= 0# Then
-                stub_sqlite3_result_double pCtx, OADate + JULIANDAY_OFFSET
+            If OADate >= -657434# And OADate <= 2958465# Then
+                If OADate >= 0# Then
+                    stub_sqlite3_result_double pCtx, OADate + JULIANDAY_OFFSET
+                Else
+                    Dim Temp As Double
+                    Temp = -Int(-OADate)
+                    stub_sqlite3_result_double pCtx, Temp - (OADate - Temp) + JULIANDAY_OFFSET
+                End If
             Else
-                Dim Temp As Double
-                Temp = -Int(-OADate)
-                stub_sqlite3_result_double pCtx, Temp - (OADate - Temp) + JULIANDAY_OFFSET
+                stub_sqlite3_result_null pCtx
             End If
         Case Else
             stub_sqlite3_result_null pCtx
@@ -210,7 +214,17 @@ If cArg = 1 Then
         Case SQLITE_INTEGER, SQLITE_FLOAT
             Dim OADate As Double
             OADate = stub_sqlite3_value_double(pValue)
-            stub_sqlite3_result_int64 pCtx, ((OADate - UNIXEPOCH_OFFSET) * 86400#) / 10000@
+            If OADate >= -657434# And OADate <= 2958465# Then
+                If OADate >= 0# Then
+                    stub_sqlite3_result_int64 pCtx, Int((OADate - UNIXEPOCH_OFFSET) * 86400#) / 10000@
+                Else
+                    Dim Temp As Double
+                    Temp = -Int(-OADate)
+                    stub_sqlite3_result_int64 pCtx, Int((Temp - (OADate - Temp) - UNIXEPOCH_OFFSET) * 86400#) / 10000@
+                End If
+            Else
+                stub_sqlite3_result_null pCtx
+            End If
         Case Else
             stub_sqlite3_result_null pCtx
     End Select
@@ -228,8 +242,20 @@ If cArg = 1 Then
     Select Case stub_sqlite3_value_type(pValue)
         Case SQLITE_INTEGER, SQLITE_FLOAT
             Dim UnixEpoch As Currency
-            UnixEpoch = stub_sqlite3_value_int64(pValue) * 10000@
-            stub_sqlite3_result_double pCtx, (UnixEpoch / 86400#) + UNIXEPOCH_OFFSET
+            UnixEpoch = stub_sqlite3_value_int64(pValue)
+            If UnixEpoch >= -5901068.16@ And UnixEpoch <= 25340221.44@ Then
+                Dim DateValue As Double
+                DateValue = ((UnixEpoch * 10000@) / 86400#) + UNIXEPOCH_OFFSET
+                If DateValue >= 0# Then
+                    stub_sqlite3_result_double pCtx, DateValue
+                Else
+                    Dim Temp As Double
+                    Temp = Int(DateValue)
+                    stub_sqlite3_result_double pCtx, Temp + (Temp - DateValue)
+                End If
+            Else
+                stub_sqlite3_result_null pCtx
+            End If
         Case Else
             stub_sqlite3_result_null pCtx
     End Select
@@ -248,7 +274,17 @@ If cArg = 1 Then
         Case SQLITE_INTEGER, SQLITE_FLOAT
             Dim OADate As Double
             OADate = stub_sqlite3_value_double(pValue)
-            stub_sqlite3_result_double pCtx, (OADate - UNIXEPOCH_OFFSET) * 86400#
+            If OADate >= -657434# And OADate <= 2958465# Then
+                If OADate >= 0# Then
+                    stub_sqlite3_result_double pCtx, (OADate - UNIXEPOCH_OFFSET) * 86400#
+                Else
+                    Dim Temp As Double
+                    Temp = -Int(-OADate)
+                    stub_sqlite3_result_double pCtx, (Temp - (OADate - Temp) - UNIXEPOCH_OFFSET) * 86400#
+                End If
+            Else
+                stub_sqlite3_result_null pCtx
+            End If
         Case Else
             stub_sqlite3_result_null pCtx
     End Select
@@ -265,9 +301,21 @@ If cArg = 1 Then
     CopyMemory pValue, ByVal pArgValue, PTR_SIZE
     Select Case stub_sqlite3_value_type(pValue)
         Case SQLITE_INTEGER, SQLITE_FLOAT
-            Dim UnixEpoch As Double
-            UnixEpoch = stub_sqlite3_value_double(pValue)
-            stub_sqlite3_result_double pCtx, (UnixEpoch / 86400#) + UNIXEPOCH_OFFSET
+            Dim UnixEpochMs As Double
+            UnixEpochMs = stub_sqlite3_value_double(pValue)
+            If UnixEpochMs >= -59010681600# And UnixEpochMs <= 253402214400# Then
+                Dim DateValue As Double
+                DateValue = (UnixEpochMs / 86400#) + UNIXEPOCH_OFFSET
+                If DateValue >= 0# Then
+                    stub_sqlite3_result_double pCtx, DateValue
+                Else
+                    Dim Temp As Double
+                    Temp = Int(DateValue)
+                    stub_sqlite3_result_double pCtx, Temp + (Temp - DateValue)
+                End If
+            Else
+                stub_sqlite3_result_null pCtx
+            End If
         Case Else
             stub_sqlite3_result_null pCtx
     End Select
