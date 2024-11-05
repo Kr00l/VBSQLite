@@ -241,11 +241,11 @@ If cArg = 1 Then
     CopyMemory pValue, ByVal pArgValue, PTR_SIZE
     Select Case stub_sqlite3_value_type(pValue)
         Case SQLITE_INTEGER, SQLITE_FLOAT
-            Dim UnixEpoch As Currency
-            UnixEpoch = stub_sqlite3_value_int64(pValue)
-            If UnixEpoch >= -5901068.16@ And UnixEpoch <= 25340221.44@ Then
+            Dim UnixEpoch As Double
+            UnixEpoch = stub_sqlite3_value_double(pValue)
+            If UnixEpoch >= -59010681600# And UnixEpoch <= 253402214400# Then
                 Dim DateValue As Double
-                DateValue = ((UnixEpoch * 10000@) / 86400#) + UNIXEPOCH_OFFSET
+                DateValue = (Int(UnixEpoch) / 86400#) + UNIXEPOCH_OFFSET
                 If DateValue >= 0# Then
                     stub_sqlite3_result_double pCtx, DateValue
                 Else
