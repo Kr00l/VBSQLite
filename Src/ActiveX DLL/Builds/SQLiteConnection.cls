@@ -178,11 +178,13 @@ If PropHandle = NULL_PTR Then Err.Raise Number:=5, Description:="DB connection m
 Dim VT As Integer
 VT = VarType(Value)
 Select Case VT
-    Case vbDecimal, VT_I8, vbLong, vbInteger, vbByte
+    Case vbDecimal, vbCurrency, VT_I8, vbLong, vbInteger, vbByte
         Dim Int64 As Currency
         Select Case VT
             Case vbDecimal
                 VarI8FromDec Value, Int64
+            Case vbCurrency
+                Int64 = Value / 10000@
             Case VT_I8
                 CopyMemory Int64, ByVal UnsignedAdd(VarPtr(Value), 8), 8
             Case vbLong, vbInteger, vbByte

@@ -120,7 +120,7 @@ Dim VT As Integer
 VT = VarType(Value)
 Dim Result As Long
 Select Case VT
-    Case vbDecimal, VT_I8, vbLong, vbInteger, vbByte ' SQLITE_INTEGER
+    Case vbDecimal, vbCurrency, VT_I8, vbLong, vbInteger, vbByte ' SQLITE_INTEGER
         If stub_sqlite3_stmt_status(PropHandle, SQLITE_STMTSTATUS_RUN, 1) > 0 Then
             PropLastResult = stub_sqlite3_reset(PropHandle)
             PropRecordCount(0) = 0
@@ -130,6 +130,9 @@ Select Case VT
         Select Case VT
             Case vbDecimal
                 VarI8FromDec Value, Int64
+                Result = stub_sqlite3_bind_int64(PropHandle, Index, Int64)
+            Case vbCurrency
+                Int64 = Value / 10000@
                 Result = stub_sqlite3_bind_int64(PropHandle, Index, Int64)
             Case VT_I8
                 CopyMemory Int64, ByVal UnsignedAdd(VarPtr(Value), 8), 8
