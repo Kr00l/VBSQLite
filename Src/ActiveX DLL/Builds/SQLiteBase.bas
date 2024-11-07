@@ -122,6 +122,7 @@ Public Sub SQLiteCreateFunctions(ByVal hDB As LongPtr)
 #Else
 Public Sub SQLiteCreateFunctions(ByVal hDB As Long)
 #End If
+Const STR_OADATE As Currency = 11155052458.0207@
 Dim STR_JULIANDAYFROMOADATE(0 To 2) As Currency, STR_JULIANDAYTOOADATE(0 To 2) As Currency
 STR_JULIANDAYFROMOADATE(0) = 701785548400967.409@: STR_JULIANDAYFROMOADATE(1) = 723318499234561.3945@: STR_JULIANDAYFROMOADATE(2) = 664.8929@
 STR_JULIANDAYTOOADATE(0) = 701785548400967.409@: STR_JULIANDAYTOOADATE(1) = 838609435078475.4809@: STR_JULIANDAYTOOADATE(2) = 0.0101@
@@ -132,6 +133,7 @@ Dim STR_UNIXEPOCHMSFROMOADATE(0 To 2) As Currency, STR_UNIXEPOCHMSTOOADATE(0 To 
 STR_UNIXEPOCHMSFROMOADATE(0) = 716506911328393.1765@: STR_UNIXEPOCHMSFROMOADATE(1) = 802919624780725.796@: STR_UNIXEPOCHMSFROMOADATE(2) = 43574423.6641@
 STR_UNIXEPOCHMSTOOADATE(0) = 716506911328393.1765@: STR_UNIXEPOCHMSTOOADATE(1) = 723318500101950.1928@: STR_UNIXEPOCHMSTOOADATE(2) = 664.8929@
 If hDB <> NULL_PTR Then
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_OADATE), -1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionOADate, NULL_PTR, NULL_PTR, NULL_PTR
     stub_sqlite3_create_function_v2 hDB, VarPtr(STR_JULIANDAYFROMOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionJulianDayFromOADate, NULL_PTR, NULL_PTR, NULL_PTR
     stub_sqlite3_create_function_v2 hDB, VarPtr(STR_JULIANDAYTOOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionJulianDayToOADate, NULL_PTR, NULL_PTR, NULL_PTR
     stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHFROMOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochFromOADate, NULL_PTR, NULL_PTR, NULL_PTR
@@ -140,6 +142,64 @@ If hDB <> NULL_PTR Then
     stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHMSTOOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochMsToOADate, NULL_PTR, NULL_PTR, NULL_PTR
 End If
 End Sub
+
+#If VBA7 Then
+Public Function SQLiteFunctionOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
+#End If
+If cArg >= 1 Then
+    Dim pValue() As LongPtr
+    ReDim pValue(0 To (cArg - 1)) ' As LongPtr
+    CopyMemory pValue(0), ByVal pArgValue, PTR_SIZE * cArg
+    Dim OADate As Double, szString As String, Success As Boolean
+    Dim IsLocal As Boolean, IsUTC As Boolean
+    Select Case stub_sqlite3_value_type(pValue(0))
+        Case SQLITE_INTEGER, SQLITE_FLOAT
+            OADate = stub_sqlite3_value_double(pValue(0))
+            If OADate >= -657434# And OADate <= 2958465# Then Success = True
+        Case Else
+            szString = SQLiteUTF8PtrToStr(stub_sqlite3_value_text(pValue(0)), stub_sqlite3_value_bytes(pValue(0)))
+            If Not szString = vbNullString Then
+                If LCase$(szString) = "now" Then
+                    OADate = CurrentUTC()
+                    IsUTC = True
+                    Success = True
+                ElseIf IsDate(szString) Then
+                    OADate = CDate(szString)
+                    Success = True
+                End If
+            End If
+    End Select
+    If Success = True Then
+        Dim i As Long
+        For i = 1 To (cArg - 1)
+            Success = False
+            szString = SQLiteUTF8PtrToStr(stub_sqlite3_value_text(pValue(i)), stub_sqlite3_value_bytes(pValue(i)))
+            If Not szString = vbNullString Then
+                Select Case LCase$(szString)
+                    Case "localtime"
+                        If IsLocal = False Then OADate = FromUTC(OADate)
+                        IsLocal = True
+                        IsUTC = False
+                        Success = True
+                    Case "utc"
+                        If IsUTC = False Then OADate = ToUTC(OADate)
+                        IsLocal = False
+                        IsUTC = True
+                        Success = True
+                End Select
+            End If
+            If Success = False Then Exit For
+        Next i
+        If Success = True Then stub_sqlite3_result_double pCtx, OADate Else stub_sqlite3_result_null pCtx
+    Else
+        stub_sqlite3_result_null pCtx
+    End If
+Else
+    stub_sqlite3_result_double pCtx, CurrentUTC()
+End If
+End Function
 
 #If VBA7 Then
 Public Function SQLiteFunctionJulianDayFromOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
