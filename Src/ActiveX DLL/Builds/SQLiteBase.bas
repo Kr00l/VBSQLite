@@ -152,47 +152,203 @@ If cArg >= 1 Then
     Dim pValue() As LongPtr
     ReDim pValue(0 To (cArg - 1)) ' As LongPtr
     CopyMemory pValue(0), ByVal pArgValue, PTR_SIZE * cArg
-    Dim OADate As Double, szString As String, Success As Boolean
-    Dim IsLocal As Boolean, IsUTC As Boolean
+    Dim OADate As Double, Dbl As Double, szString As String, Success As Boolean
+    Dim IsOADate As Boolean, IsLocal As Boolean, IsUTC As Boolean
     Select Case stub_sqlite3_value_type(pValue(0))
         Case SQLITE_INTEGER, SQLITE_FLOAT
-            OADate = stub_sqlite3_value_double(pValue(0))
-            If OADate >= -657434# And OADate <= 2958465# Then Success = True
+            Dbl = stub_sqlite3_value_double(pValue(0))
+            If cArg >= 2 Then
+                Success = True
+            ElseIf OADate >= -657434# And OADate < 2958466# Then
+                OADate = Dbl
+                IsOADate = True
+                Success = True
+            End If
         Case Else
             szString = SQLiteUTF8PtrToStr(stub_sqlite3_value_text(pValue(0)), stub_sqlite3_value_bytes(pValue(0)))
             If Not szString = vbNullString Then
                 If LCase$(szString) = "now" Then
                     OADate = CurrentUTC()
+                    IsOADate = True
                     IsUTC = True
                     Success = True
                 ElseIf IsDate(szString) Then
+                    On Error Resume Next
                     OADate = CDate(szString)
-                    Success = True
+                    If Err.Number = 0 Then
+                        IsOADate = True
+                        Success = True
+                    End If
+                    On Error GoTo 0
                 End If
             End If
     End Select
     If Success = True Then
-        Dim i As Long
+        Dim i As Long, DateValue As Double, Temp As Double, DayOfWeek As Integer, Pos As Long, Number As Double
         For i = 1 To (cArg - 1)
             Success = False
             szString = SQLiteUTF8PtrToStr(stub_sqlite3_value_text(pValue(i)), stub_sqlite3_value_bytes(pValue(i)))
             If Not szString = vbNullString Then
-                Select Case LCase$(szString)
-                    Case "localtime"
-                        If IsLocal = False Then OADate = FromUTC(OADate)
-                        IsLocal = True
-                        IsUTC = False
-                        Success = True
-                    Case "utc"
-                        If IsUTC = False Then OADate = ToUTC(OADate)
-                        IsLocal = False
-                        IsUTC = True
-                        Success = True
-                End Select
+                szString = LCase$(szString)
+                If i = 1 Then
+                    Select Case szString
+                        Case "unixepoch"
+                            If IsOADate = False And i = 1 Then
+                                If Dbl >= -59010681600# And Dbl < 253402300800# Then
+                                    DateValue = (Int(Dbl) / 86400#) + UNIXEPOCH_OFFSET
+                                    If DateValue >= 0# Then
+                                        OADate = DateValue
+                                    Else
+                                        Temp = Int(DateValue)
+                                        OADate = Temp + (Temp - DateValue)
+                                    End If
+                                    IsOADate = True
+                                    Success = True
+                                End If
+                            End If
+                        Case "julianday"
+                            If IsOADate = False And i = 1 Then
+                                If Dbl >= 1757584.5 And Dbl < 5373484.5 Then
+                                    If Dbl >= JULIANDAY_OFFSET Then
+                                        OADate = Dbl - JULIANDAY_OFFSET
+                                    Else
+                                        DateValue = Dbl - JULIANDAY_OFFSET
+                                        Temp = Int(DateValue)
+                                        OADate = Temp + (Temp - DateValue)
+                                    End If
+                                    IsOADate = True
+                                    Success = True
+                                End If
+                            End If
+                        Case "auto"
+                            If IsOADate = False And i = 1 Then
+                                If Dbl >= 0# And Dbl < 5373484.5 Then
+                                    If Dbl >= 1757584.5 Then
+                                        If Dbl >= JULIANDAY_OFFSET Then
+                                            OADate = Dbl - JULIANDAY_OFFSET
+                                        Else
+                                            DateValue = Dbl - JULIANDAY_OFFSET
+                                            Temp = Int(DateValue)
+                                            OADate = Temp + (Temp - DateValue)
+                                        End If
+                                        IsOADate = True
+                                        Success = True
+                                    End If
+                                Else
+                                    If Dbl >= -59010681600# And Dbl < 253402300800# Then
+                                        DateValue = (Int(Dbl) / 86400#) + UNIXEPOCH_OFFSET
+                                        If DateValue >= 0# Then
+                                            OADate = DateValue
+                                        Else
+                                            Temp = Int(DateValue)
+                                            OADate = Temp + (Temp - DateValue)
+                                        End If
+                                        IsOADate = True
+                                        Success = True
+                                    End If
+                                End If
+                            End If
+                        Case Else
+                            If Dbl >= -657434# And Dbl < 2958466# Then
+                                OADate = Dbl
+                                IsOADate = True
+                            End If
+                            If szString = "oadate" Then Success = True ' No-op
+                    End Select
+                End If
+                If IsOADate = True And Success = False Then
+                    Select Case szString
+                        Case "ceiling"
+                            ' Void
+                        Case "floor"
+                            ' Void
+                        Case "start of month"
+                            OADate = DateSerial(VBA.Year(OADate), VBA.Month(OADate), 1)
+                            Success = True
+                        Case "start of year"
+                            OADate = DateSerial(VBA.Year(OADate), 1, 1)
+                            Success = True
+                        Case "start of day"
+                            OADate = Int(OADate)
+                            Success = True
+                        Case "weekday 0", "weekday 1", "weekday 2", "weekday 3", "weekday 4", "weekday 5", "weekday 6"
+                            DayOfWeek = CInt(Right$(szString, 1))
+                            Do Until VBA.Weekday(OADate) = (DayOfWeek + 1)
+                                OADate = DateAdd("d", 1, OADate)
+                            Loop
+                            Success = True
+                        Case "localtime"
+                            If IsLocal = False Then OADate = FromUTC(OADate)
+                            IsLocal = True
+                            IsUTC = False
+                            Success = True
+                        Case "utc"
+                            If IsUTC = False Then OADate = ToUTC(OADate)
+                            IsLocal = False
+                            IsUTC = True
+                            Success = True
+                        Case "subsec", "subsecond"
+                            ' Void
+                        Case Else
+                            Pos = InStr(szString, " ")
+                            If Pos > 0 Then
+                                Select Case Mid$(szString, Pos + 1)
+                                    Case "days", "day"
+                                        On Error Resume Next
+                                        Number = Val(Left$(szString, Pos - 1))
+                                        If Err.Number = 0 Then
+                                            OADate = DateAdd("d", Number, OADate)
+                                            Success = True
+                                        End If
+                                        On Error GoTo 0
+                                    Case "hours", "hour"
+                                        On Error Resume Next
+                                        Number = Val(Left$(szString, Pos - 1))
+                                        If Err.Number = 0 Then
+                                            OADate = DateAdd("h", Number, OADate)
+                                            Success = True
+                                        End If
+                                        On Error GoTo 0
+                                    Case "minutes", "minute"
+                                        On Error Resume Next
+                                        Number = Val(Left$(szString, Pos - 1))
+                                        If Err.Number = 0 Then
+                                            OADate = DateAdd("n", Number, OADate)
+                                            Success = True
+                                        End If
+                                        On Error GoTo 0
+                                    Case "second", "seconds"
+                                        On Error Resume Next
+                                        Number = Val(Left$(szString, Pos - 1))
+                                        If Err.Number = 0 Then
+                                            OADate = DateAdd("s", Number, OADate)
+                                            Success = True
+                                        End If
+                                        On Error GoTo 0
+                                    Case "months", "month"
+                                        On Error Resume Next
+                                        Number = Val(Left$(szString, Pos - 1))
+                                        If Err.Number = 0 Then
+                                            OADate = DateAdd("m", Number, OADate)
+                                            Success = True
+                                        End If
+                                        On Error GoTo 0
+                                    Case "years", "year"
+                                        On Error Resume Next
+                                        Number = Val(Left$(szString, Pos - 1))
+                                        If Err.Number = 0 Then
+                                            OADate = DateAdd("yyyy", Number, OADate)
+                                            Success = True
+                                        End If
+                                        On Error GoTo 0
+                                End Select
+                            End If
+                    End Select
+                End If
             End If
-            If Success = False Then Exit For
+            If IsOADate = False Or Success = False Then Exit For
         Next i
-        If Success = True Then stub_sqlite3_result_double pCtx, OADate Else stub_sqlite3_result_null pCtx
+        If IsOADate = True Then stub_sqlite3_result_double pCtx, OADate Else stub_sqlite3_result_null pCtx
     Else
         stub_sqlite3_result_null pCtx
     End If
@@ -213,7 +369,7 @@ If cArg = 1 Then
         Case SQLITE_INTEGER, SQLITE_FLOAT
             Dim OADate As Double
             OADate = stub_sqlite3_value_double(pValue)
-            If OADate >= -657434# And OADate <= 2958465# Then
+            If OADate >= -657434# And OADate < 2958466# Then
                 If OADate >= 0# Then
                     stub_sqlite3_result_double pCtx, OADate + JULIANDAY_OFFSET
                 Else
@@ -242,9 +398,7 @@ If cArg = 1 Then
         Case SQLITE_INTEGER, SQLITE_FLOAT
             Dim JulianDay As Double
             JulianDay = stub_sqlite3_value_double(pValue)
-            Const MIN_DATE As Double = -657434# + JULIANDAY_OFFSET ' 01/01/0100
-            Const MAX_DATE As Double = 2958465# + JULIANDAY_OFFSET ' 12/31/9999
-            If JulianDay >= MIN_DATE And JulianDay <= MAX_DATE Then
+            If JulianDay >= 1757584.5 And JulianDay < 5373484.5 Then
                 If JulianDay >= JULIANDAY_OFFSET Then
                     stub_sqlite3_result_double pCtx, JulianDay - JULIANDAY_OFFSET
                 Else
@@ -274,7 +428,7 @@ If cArg = 1 Then
         Case SQLITE_INTEGER, SQLITE_FLOAT
             Dim OADate As Double
             OADate = stub_sqlite3_value_double(pValue)
-            If OADate >= -657434# And OADate <= 2958465# Then
+            If OADate >= -657434# And OADate < 2958466# Then
                 If OADate >= 0# Then
                     stub_sqlite3_result_int64 pCtx, Int((OADate - UNIXEPOCH_OFFSET) * 86400#) / 10000@
                 Else
@@ -303,7 +457,7 @@ If cArg = 1 Then
         Case SQLITE_INTEGER, SQLITE_FLOAT
             Dim UnixEpoch As Double
             UnixEpoch = stub_sqlite3_value_double(pValue)
-            If UnixEpoch >= -59010681600# And UnixEpoch <= 253402214400# Then
+            If UnixEpoch >= -59010681600# And UnixEpoch < 253402300800# Then
                 Dim DateValue As Double
                 DateValue = (Int(UnixEpoch) / 86400#) + UNIXEPOCH_OFFSET
                 If DateValue >= 0# Then
@@ -334,7 +488,7 @@ If cArg = 1 Then
         Case SQLITE_INTEGER, SQLITE_FLOAT
             Dim OADate As Double
             OADate = stub_sqlite3_value_double(pValue)
-            If OADate >= -657434# And OADate <= 2958465# Then
+            If OADate >= -657434# And OADate < 2958466# Then
                 If OADate >= 0# Then
                     stub_sqlite3_result_double pCtx, (OADate - UNIXEPOCH_OFFSET) * 86400#
                 Else
@@ -363,7 +517,7 @@ If cArg = 1 Then
         Case SQLITE_INTEGER, SQLITE_FLOAT
             Dim UnixEpochMs As Double
             UnixEpochMs = stub_sqlite3_value_double(pValue)
-            If UnixEpochMs >= -59010681600# And UnixEpochMs <= 253402214400# Then
+            If UnixEpochMs >= -59010681600# And UnixEpochMs < 253402300800# Then
                 Dim DateValue As Double
                 DateValue = (UnixEpochMs / 86400#) + UNIXEPOCH_OFFSET
                 If DateValue >= 0# Then
