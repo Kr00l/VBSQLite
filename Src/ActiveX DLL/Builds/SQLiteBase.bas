@@ -190,25 +190,35 @@ If cArg >= 1 Then
             szString = SQLiteUTF8PtrToStr(stub_sqlite3_value_text(pValue(i)), stub_sqlite3_value_bytes(pValue(i)))
             If Not szString = vbNullString Then
                 szString = LCase$(szString)
-                If i = 1 Then
+                If IsOADate = False And i = 1 Then
                     Select Case szString
                         Case "unixepoch"
-                            If IsOADate = False And i = 1 Then
-                                If Dbl >= -59010681600# And Dbl < 253402300800# Then
-                                    DateValue = (Int(Dbl) / 86400#) + UNIXEPOCH_OFFSET
-                                    If DateValue >= 0# Then
-                                        OADate = DateValue
-                                    Else
-                                        Temp = Int(DateValue)
-                                        OADate = Temp + (Temp - DateValue)
-                                    End If
-                                    IsOADate = True
-                                    Success = True
+                            If Dbl >= -59010681600# And Dbl < 253402300800# Then
+                                DateValue = (Int(Dbl) / 86400#) + UNIXEPOCH_OFFSET
+                                If DateValue >= 0# Then
+                                    OADate = DateValue
+                                Else
+                                    Temp = Int(DateValue)
+                                    OADate = Temp + (Temp - DateValue)
                                 End If
+                                IsOADate = True
+                                Success = True
                             End If
                         Case "julianday"
-                            If IsOADate = False And i = 1 Then
-                                If Dbl >= 1757584.5 And Dbl < 5373484.5 Then
+                            If Dbl >= 1757584.5 And Dbl < 5373484.5 Then
+                                If Dbl >= JULIANDAY_OFFSET Then
+                                    OADate = Dbl - JULIANDAY_OFFSET
+                                Else
+                                    DateValue = Dbl - JULIANDAY_OFFSET
+                                    Temp = Int(DateValue)
+                                    OADate = Temp + (Temp - DateValue)
+                                End If
+                                IsOADate = True
+                                Success = True
+                            End If
+                        Case "auto"
+                            If Dbl >= 0# And Dbl < 5373484.5 Then
+                                If Dbl >= 1757584.5 Then
                                     If Dbl >= JULIANDAY_OFFSET Then
                                         OADate = Dbl - JULIANDAY_OFFSET
                                     Else
@@ -219,33 +229,17 @@ If cArg >= 1 Then
                                     IsOADate = True
                                     Success = True
                                 End If
-                            End If
-                        Case "auto"
-                            If IsOADate = False And i = 1 Then
-                                If Dbl >= 0# And Dbl < 5373484.5 Then
-                                    If Dbl >= 1757584.5 Then
-                                        If Dbl >= JULIANDAY_OFFSET Then
-                                            OADate = Dbl - JULIANDAY_OFFSET
-                                        Else
-                                            DateValue = Dbl - JULIANDAY_OFFSET
-                                            Temp = Int(DateValue)
-                                            OADate = Temp + (Temp - DateValue)
-                                        End If
-                                        IsOADate = True
-                                        Success = True
+                            Else
+                                If Dbl >= -59010681600# And Dbl < 253402300800# Then
+                                    DateValue = (Int(Dbl) / 86400#) + UNIXEPOCH_OFFSET
+                                    If DateValue >= 0# Then
+                                        OADate = DateValue
+                                    Else
+                                        Temp = Int(DateValue)
+                                        OADate = Temp + (Temp - DateValue)
                                     End If
-                                Else
-                                    If Dbl >= -59010681600# And Dbl < 253402300800# Then
-                                        DateValue = (Int(Dbl) / 86400#) + UNIXEPOCH_OFFSET
-                                        If DateValue >= 0# Then
-                                            OADate = DateValue
-                                        Else
-                                            Temp = Int(DateValue)
-                                            OADate = Temp + (Temp - DateValue)
-                                        End If
-                                        IsOADate = True
-                                        Success = True
-                                    End If
+                                    IsOADate = True
+                                    Success = True
                                 End If
                             End If
                         Case Else
