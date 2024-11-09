@@ -122,24 +122,19 @@ Public Sub SQLiteCreateFunctions(ByVal hDB As LongPtr)
 #Else
 Public Sub SQLiteCreateFunctions(ByVal hDB As Long)
 #End If
-Const STR_OADATE As Currency = 11155052458.0207@
-Dim STR_JULIANDAYFROMOADATE(0 To 2) As Currency, STR_JULIANDAYTOOADATE(0 To 2) As Currency
-STR_JULIANDAYFROMOADATE(0) = 701785548400967.409@: STR_JULIANDAYFROMOADATE(1) = 723318499234561.3945@: STR_JULIANDAYFROMOADATE(2) = 664.8929@
-STR_JULIANDAYTOOADATE(0) = 701785548400967.409@: STR_JULIANDAYTOOADATE(1) = 838609435078475.4809@: STR_JULIANDAYTOOADATE(2) = 0.0101@
-Dim STR_UNIXEPOCHFROMOADATE(0 To 2) As Currency, STR_UNIXEPOCHTOOADATE(0 To 2) As Currency
-STR_UNIXEPOCHFROMOADATE(0) = 716506911328393.1765@: STR_UNIXEPOCHFROMOADATE(1) = 723318499234561.3928@: STR_UNIXEPOCHFROMOADATE(2) = 664.8929@
-STR_UNIXEPOCHTOOADATE(0) = 716506911328393.1765@: STR_UNIXEPOCHTOOADATE(1) = 838609435078475.4792@: STR_UNIXEPOCHTOOADATE(2) = 0.0101@
-Dim STR_UNIXEPOCHMSFROMOADATE(0 To 2) As Currency, STR_UNIXEPOCHMSTOOADATE(0 To 2) As Currency
-STR_UNIXEPOCHMSFROMOADATE(0) = 716506911328393.1765@: STR_UNIXEPOCHMSFROMOADATE(1) = 802919624780725.796@: STR_UNIXEPOCHMSFROMOADATE(2) = 43574423.6641@
-STR_UNIXEPOCHMSTOOADATE(0) = 716506911328393.1765@: STR_UNIXEPOCHMSTOOADATE(1) = 723318500101950.1928@: STR_UNIXEPOCHMSTOOADATE(2) = 664.8929@
+Const STR_OADATE_UTF8 As Currency = 11155052458.0207@
+Dim STR_JULIANDAYFROMOADATE_UTF8(0 To 2) As Currency, STR_JULIANDAYTOOADATE_UTF8(0 To 2) As Currency
+STR_JULIANDAYFROMOADATE_UTF8(0) = 701785548400967.409@: STR_JULIANDAYFROMOADATE_UTF8(1) = 723318499234561.3945@: STR_JULIANDAYFROMOADATE_UTF8(2) = 664.8929@
+STR_JULIANDAYTOOADATE_UTF8(0) = 701785548400967.409@: STR_JULIANDAYTOOADATE_UTF8(1) = 838609435078475.4809@: STR_JULIANDAYTOOADATE_UTF8(2) = 0.0101@
+Dim STR_UNIXEPOCHFROMOADATE_UTF8(0 To 2) As Currency, STR_UNIXEPOCHTOOADATE_UTF8(0 To 2) As Currency
+STR_UNIXEPOCHFROMOADATE_UTF8(0) = 716506911328393.1765@: STR_UNIXEPOCHFROMOADATE_UTF8(1) = 723318499234561.3928@: STR_UNIXEPOCHFROMOADATE_UTF8(2) = 664.8929@
+STR_UNIXEPOCHTOOADATE_UTF8(0) = 716506911328393.1765@: STR_UNIXEPOCHTOOADATE_UTF8(1) = 838609435078475.4792@: STR_UNIXEPOCHTOOADATE_UTF8(2) = 0.0101@
 If hDB <> NULL_PTR Then
-    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_OADATE), -1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionOADate, NULL_PTR, NULL_PTR, NULL_PTR
-    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_JULIANDAYFROMOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionJulianDayFromOADate, NULL_PTR, NULL_PTR, NULL_PTR
-    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_JULIANDAYTOOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionJulianDayToOADate, NULL_PTR, NULL_PTR, NULL_PTR
-    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHFROMOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochFromOADate, NULL_PTR, NULL_PTR, NULL_PTR
-    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHTOOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochToOADate, NULL_PTR, NULL_PTR, NULL_PTR
-    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHMSFROMOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochMsFromOADate, NULL_PTR, NULL_PTR, NULL_PTR
-    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHMSTOOADATE(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochMsToOADate, NULL_PTR, NULL_PTR, NULL_PTR
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_OADATE_UTF8), -1, SQLITE_UTF8 Or SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionOADate, NULL_PTR, NULL_PTR, NULL_PTR
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_JULIANDAYFROMOADATE_UTF8(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionJulianDayFromOADate, NULL_PTR, NULL_PTR, NULL_PTR
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_JULIANDAYTOOADATE_UTF8(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionJulianDayToOADate, NULL_PTR, NULL_PTR, NULL_PTR
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHFROMOADATE_UTF8(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochFromOADate, NULL_PTR, NULL_PTR, NULL_PTR
+    stub_sqlite3_create_function_v2 hDB, VarPtr(STR_UNIXEPOCHTOOADATE_UTF8(0)), 1, SQLITE_DETERMINISTIC, 0, AddressOf SQLiteFunctionUnixEpochToOADate, NULL_PTR, NULL_PTR, NULL_PTR
 End If
 End Sub
 
@@ -194,7 +189,7 @@ If cArg >= 1 Then
                     Select Case szString
                         Case "unixepoch"
                             If Dbl >= -59010681600# And Dbl < 253402300800# Then
-                                DateValue = (Int(Dbl) / 86400#) + UNIXEPOCH_OFFSET
+                                DateValue = (Dbl / 86400#) + UNIXEPOCH_OFFSET
                                 If DateValue >= 0# Then
                                     OADate = DateValue
                                 Else
@@ -231,7 +226,7 @@ If cArg >= 1 Then
                                 End If
                             Else
                                 If Dbl >= -59010681600# And Dbl < 253402300800# Then
-                                    DateValue = (Int(Dbl) / 86400#) + UNIXEPOCH_OFFSET
+                                    DateValue = (Dbl / 86400#) + UNIXEPOCH_OFFSET
                                     If DateValue >= 0# Then
                                         OADate = DateValue
                                     Else
@@ -282,7 +277,8 @@ If cArg >= 1 Then
                             IsUTC = True
                             Success = True
                         Case "subsec", "subsecond"
-                            ' Void
+                            ' No-op
+                            Success = True
                         Case Else
                             Pos = InStr(szString, " ")
                             If Pos > 0 Then
@@ -342,7 +338,7 @@ If cArg >= 1 Then
             End If
             If IsOADate = False Or Success = False Then Exit For
         Next i
-        If IsOADate = True Then stub_sqlite3_result_double pCtx, OADate Else stub_sqlite3_result_null pCtx
+        If IsOADate = True And Success = True Then stub_sqlite3_result_double pCtx, OADate Else stub_sqlite3_result_null pCtx
     Else
         stub_sqlite3_result_null pCtx
     End If
@@ -368,7 +364,7 @@ If cArg = 1 Then
                     stub_sqlite3_result_double pCtx, OADate + JULIANDAY_OFFSET
                 Else
                     Dim Temp As Double
-                    Temp = -Int(-OADate)
+                    Temp = Fix(OADate)
                     stub_sqlite3_result_double pCtx, Temp - (OADate - Temp) + JULIANDAY_OFFSET
                 End If
             Else
@@ -424,11 +420,11 @@ If cArg = 1 Then
             OADate = stub_sqlite3_value_double(pValue)
             If OADate >= -657434# And OADate < 2958466# Then
                 If OADate >= 0# Then
-                    stub_sqlite3_result_int64 pCtx, Int((OADate - UNIXEPOCH_OFFSET) * 86400#) / 10000@
+                    stub_sqlite3_result_double pCtx, (OADate - UNIXEPOCH_OFFSET) * 86400#
                 Else
                     Dim Temp As Double
-                    Temp = -Int(-OADate)
-                    stub_sqlite3_result_int64 pCtx, Int((Temp - (OADate - Temp) - UNIXEPOCH_OFFSET) * 86400#) / 10000@
+                    Temp = Fix(OADate)
+                    stub_sqlite3_result_double pCtx, (Temp - (OADate - Temp) - UNIXEPOCH_OFFSET) * 86400#
                 End If
             Else
                 stub_sqlite3_result_null pCtx
@@ -453,67 +449,7 @@ If cArg = 1 Then
             UnixEpoch = stub_sqlite3_value_double(pValue)
             If UnixEpoch >= -59010681600# And UnixEpoch < 253402300800# Then
                 Dim DateValue As Double
-                DateValue = (Int(UnixEpoch) / 86400#) + UNIXEPOCH_OFFSET
-                If DateValue >= 0# Then
-                    stub_sqlite3_result_double pCtx, DateValue
-                Else
-                    Dim Temp As Double
-                    Temp = Int(DateValue)
-                    stub_sqlite3_result_double pCtx, Temp + (Temp - DateValue)
-                End If
-            Else
-                stub_sqlite3_result_null pCtx
-            End If
-        Case Else
-            stub_sqlite3_result_null pCtx
-    End Select
-End If
-End Function
-
-#If VBA7 Then
-Public Function SQLiteFunctionUnixEpochMsFromOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
-#Else
-Public Function SQLiteFunctionUnixEpochMsFromOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
-#End If
-If cArg = 1 Then
-    Dim pValue As LongPtr
-    CopyMemory pValue, ByVal pArgValue, PTR_SIZE
-    Select Case stub_sqlite3_value_type(pValue)
-        Case SQLITE_INTEGER, SQLITE_FLOAT
-            Dim OADate As Double
-            OADate = stub_sqlite3_value_double(pValue)
-            If OADate >= -657434# And OADate < 2958466# Then
-                If OADate >= 0# Then
-                    stub_sqlite3_result_double pCtx, (OADate - UNIXEPOCH_OFFSET) * 86400#
-                Else
-                    Dim Temp As Double
-                    Temp = -Int(-OADate)
-                    stub_sqlite3_result_double pCtx, (Temp - (OADate - Temp) - UNIXEPOCH_OFFSET) * 86400#
-                End If
-            Else
-                stub_sqlite3_result_null pCtx
-            End If
-        Case Else
-            stub_sqlite3_result_null pCtx
-    End Select
-End If
-End Function
-
-#If VBA7 Then
-Public Function SQLiteFunctionUnixEpochMsToOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
-#Else
-Public Function SQLiteFunctionUnixEpochMsToOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
-#End If
-If cArg = 1 Then
-    Dim pValue As LongPtr
-    CopyMemory pValue, ByVal pArgValue, PTR_SIZE
-    Select Case stub_sqlite3_value_type(pValue)
-        Case SQLITE_INTEGER, SQLITE_FLOAT
-            Dim UnixEpochMs As Double
-            UnixEpochMs = stub_sqlite3_value_double(pValue)
-            If UnixEpochMs >= -59010681600# And UnixEpochMs < 253402300800# Then
-                Dim DateValue As Double
-                DateValue = (UnixEpochMs / 86400#) + UNIXEPOCH_OFFSET
+                DateValue = (UnixEpoch / 86400#) + UNIXEPOCH_OFFSET
                 If DateValue >= 0# Then
                     stub_sqlite3_result_double pCtx, DateValue
                 Else
