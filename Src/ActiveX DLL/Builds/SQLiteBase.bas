@@ -148,7 +148,7 @@ If cArg >= 1 Then
     ReDim pValue(0 To (cArg - 1)) ' As LongPtr
     CopyMemory pValue(0), ByVal pArgValue, PTR_SIZE * cArg
     Dim OADate As Double, Dbl As Double, szString As String, Success As Boolean
-    Dim IsOADate As Boolean, IsLocal As Boolean, IsUTC As Boolean
+    Dim IsOADate As Boolean, IsLocal As Boolean, IsUTC As Boolean, IsSubsecond  As Boolean
     Select Case stub_sqlite3_value_type(pValue(0))
         Case SQLITE_INTEGER, SQLITE_FLOAT
             Dbl = stub_sqlite3_value_double(pValue(0))
@@ -277,7 +277,7 @@ If cArg >= 1 Then
                             IsUTC = True
                             Success = True
                         Case "subsec", "subsecond"
-                            ' No-op
+                            IsSubsecond = True
                             Success = True
                         Case Else
                             Pos = InStr(szString, " ")
@@ -338,7 +338,15 @@ If cArg >= 1 Then
             End If
             If IsOADate = False Or Success = False Then Exit For
         Next i
-        If IsOADate = True And Success = True Then stub_sqlite3_result_double pCtx, OADate Else stub_sqlite3_result_null pCtx
+        If IsOADate = True And Success = True Then
+            If IsSubsecond = False Then
+                stub_sqlite3_result_double pCtx, Fix(OADate * 86400#) / 86400#
+            Else
+                stub_sqlite3_result_double pCtx, OADate
+            End If
+        Else
+            stub_sqlite3_result_null pCtx
+        End If
     Else
         stub_sqlite3_result_null pCtx
     End If
