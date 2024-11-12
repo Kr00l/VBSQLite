@@ -258,12 +258,12 @@ If cArg >= 1 Then
                             OADate = DateSerial(VBA.Year(OADate), 1, 1)
                             Success = True
                         Case "start of day"
-                            OADate = Int(OADate)
+                            OADate = Fix(OADate)
                             Success = True
                         Case "weekday 0", "weekday 1", "weekday 2", "weekday 3", "weekday 4", "weekday 5", "weekday 6"
                             DayOfWeek = CInt(Right$(szString, 1))
                             Do Until VBA.Weekday(OADate) = (DayOfWeek + 1)
-                                OADate = DateAdd("d", 1, OADate)
+                                If OADate < #12/31/9999# Then OADate = DateAdd("d", 1, OADate) Else Exit Do
                             Loop
                             Success = True
                         Case "localtime"
