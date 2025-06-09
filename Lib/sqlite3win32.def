@@ -184,6 +184,7 @@ EXPORTS
     sqlite3_set_auxdata=_sqlite3_set_auxdata@16
     sqlite3_set_clientdata=_sqlite3_set_clientdata@16
     sqlite3_set_last_insert_rowid=_sqlite3_set_last_insert_rowid@12
+    sqlite3_setlk_timeout=_sqlite3_setlk_timeout@12
     sqlite3_shutdown=_sqlite3_shutdown@0
     sqlite3_sleep=_sqlite3_sleep@4
     sqlite3_soft_heap_limit64=_sqlite3_soft_heap_limit64@8
