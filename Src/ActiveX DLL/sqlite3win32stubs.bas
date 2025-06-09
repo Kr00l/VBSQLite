@@ -202,6 +202,7 @@ Public Declare PtrSafe Function stub_sqlite3_set_authorizer CDecl Lib sqlite3 Al
 Public Declare PtrSafe Function stub_sqlite3_set_auxdata CDecl Lib sqlite3 Alias "sqlite3_set_auxdata" (ByVal pCtx As LongPtr, ByVal iArg As Long, ByVal pAux As LongPtr, ByVal lpfnDestroy As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_set_clientdata CDecl Lib sqlite3 Alias "sqlite3_set_clientdata" (ByVal hDB As LongPtr, ByVal pzName As LongPtr, ByVal pData As LongPtr, ByVal lpfnDestroy As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_set_last_insert_rowid CDecl Lib sqlite3 Alias "sqlite3_set_last_insert_rowid" (ByVal hDB As LongPtr, ByVal iRow As Currency) As Long
+Public Declare PtrSafe Function stub_sqlite3_setlk_timeout CDecl Lib sqlite3 Alias "sqlite3_setlk_timeout" (ByVal hDB As LongPtr, ByVal Milliseconds As Long, ByVal Flags As Long) As Long
 Public Declare PtrSafe Function stub_sqlite3_shutdown CDecl Lib sqlite3 Alias "sqlite3_shutdown" () As Long
 Public Declare PtrSafe Function stub_sqlite3_sleep CDecl Lib sqlite3 Alias "sqlite3_sleep" (ByVal dwMilliseconds As Long) As Long
 Public Declare PtrSafe Function stub_sqlite3_snprintf CDecl Lib sqlite3 Alias "sqlite3_snprintf" (ByVal n As Long, ByVal pzBuffer As LongPtr, ByVal pzFormat As LongPtr, ByVal ParamArray Args As Any()) As LongPtr
@@ -478,6 +479,7 @@ Private Declare Function sqlite3_set_authorizer Lib "sqlite3win32.dll" (ByVal hD
 Private Declare Function sqlite3_set_auxdata Lib "sqlite3win32.dll" (ByVal pCtx As Long, ByVal iArg As Long, ByVal pAux As Long, ByVal lpfnDestroy As Long) As Long
 Private Declare Function sqlite3_set_clientdata Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzName As Long, ByVal pData As Long, ByVal lpfnDestroy As Long) As Long
 Private Declare Function sqlite3_set_last_insert_rowid Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal iRow As Currency) As Long
+Private Declare Function sqlite3_setlk_timeout Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal Milliseconds As Long, ByVal Flags As Long) As Long
 Private Declare Function sqlite3_shutdown Lib "sqlite3win32.dll" () As Long
 Private Declare Function sqlite3_sleep Lib "sqlite3win32.dll" (ByVal dwMilliseconds As Long) As Long
 Private Declare Function sqlite3_soft_heap_limit Lib "sqlite3win32.dll" (ByVal n As Long) As Long
@@ -1300,6 +1302,10 @@ End Function
 
 Public Function stub_sqlite3_set_last_insert_rowid(ByVal hDB As Long, ByVal iRow As Currency) As Long
 stub_sqlite3_set_last_insert_rowid = sqlite3_set_last_insert_rowid(hDB, iRow)
+End Function
+
+Public Function stub_sqlite3_setlk_timeout(ByVal hDB As Long, ByVal Milliseconds As Long, ByVal Flags As Long) As Long
+stub_sqlite3_setlk_timeout = sqlite3_setlk_timeout(hDB, Milliseconds, Flags)
 End Function
 
 Public Function stub_sqlite3_shutdown() As Long
