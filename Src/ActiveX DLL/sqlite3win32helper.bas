@@ -436,6 +436,7 @@ Public Const SQLITE_DBSTATUS_CACHE_WRITE As Long = 9
 Public Const SQLITE_DBSTATUS_DEFERRED_FKS As Long = 10
 Public Const SQLITE_DBSTATUS_CACHE_USED_SHARED As Long = 11
 Public Const SQLITE_DBSTATUS_CACHE_SPILL As Long = 12
+Public Const SQLITE_DBSTATUS_TEMPBUF_SPILL As Long = 13
 
 ' Prepared Statement Status Parameters
 Public Const SQLITE_STMTSTATUS_FULLSCAN_STEP As Long = 1
@@ -449,6 +450,7 @@ Public Const SQLITE_STMTSTATUS_FILTER_HIT As Long = 8
 Public Const SQLITE_STMTSTATUS_MEMUSED As Long = 99
 
 ' Checkpoint Mode Values
+Public Const SQLITE_CHECKPOINT_NOOP As Long = -1
 Public Const SQLITE_CHECKPOINT_PASSIVE As Long = 0
 Public Const SQLITE_CHECKPOINT_FULL As Long = 1
 Public Const SQLITE_CHECKPOINT_RESTART As Long = 2

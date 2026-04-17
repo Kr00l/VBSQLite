@@ -102,6 +102,7 @@ Public Declare PtrSafe Function stub_sqlite3_db_name CDecl Lib sqlite3 Alias "sq
 Public Declare PtrSafe Function stub_sqlite3_db_readonly CDecl Lib sqlite3 Alias "sqlite3_db_readonly" (ByVal hDB As LongPtr, ByVal pzDbName As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_db_release_memory CDecl Lib sqlite3 Alias "sqlite3_db_release_memory" (ByVal hDB As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_db_status CDecl Lib sqlite3 Alias "sqlite3_db_status" (ByVal hDB As LongPtr, ByVal StatusOpt As Long, ByVal pCurrent As LongPtr, ByVal pHighwater As LongPtr, ByVal ResetFlag As Long) As Long
+Public Declare PtrSafe Function stub_sqlite3_db_status64 CDecl Lib sqlite3 Alias "sqlite3_db_status64" (ByVal hDB As LongPtr, ByVal StatusOpt As Long, ByVal pCurrent As LongPtr, ByVal pHighwater As LongPtr, ByVal ResetFlag As Long) As Long
 Public Declare PtrSafe Function stub_sqlite3_declare_vtab CDecl Lib sqlite3 Alias "sqlite3_declare_vtab" (ByVal hDB As LongPtr, ByVal pzCreateTable As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_deserialize CDecl Lib sqlite3 Alias "sqlite3_deserialize" (ByVal hDB As LongPtr, ByVal pzSchema As LongPtr, ByVal pData As LongPtr, ByVal szDB As Currency, ByVal szBuffer As Currency, ByVal Flags As Long) As Long
 Public Declare PtrSafe Function stub_sqlite3_drop_modules CDecl Lib sqlite3 Alias "sqlite3_drop_modules" (ByVal hDB As LongPtr, ByVal azKeep As LongPtr) As Long
@@ -201,6 +202,7 @@ Public Declare PtrSafe Function stub_sqlite3_rtree_query_callback CDecl Lib sqli
 Public Declare PtrSafe Function stub_sqlite3_set_authorizer CDecl Lib sqlite3 Alias "sqlite3_set_authorizer" (ByVal hDB As LongPtr, ByVal lpfnAuth As LongPtr, ByVal pArg As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_set_auxdata CDecl Lib sqlite3 Alias "sqlite3_set_auxdata" (ByVal pCtx As LongPtr, ByVal iArg As Long, ByVal pAux As LongPtr, ByVal lpfnDestroy As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_set_clientdata CDecl Lib sqlite3 Alias "sqlite3_set_clientdata" (ByVal hDB As LongPtr, ByVal pzName As LongPtr, ByVal pData As LongPtr, ByVal lpfnDestroy As LongPtr) As Long
+Public Declare PtrSafe Function stub_sqlite3_set_errmsg CDecl Lib sqlite3 Alias "sqlite3_set_errmsg" (ByVal hDB As LongPtr, ByVal ErrCode As Long, ByVal pzErrMsg As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_set_last_insert_rowid CDecl Lib sqlite3 Alias "sqlite3_set_last_insert_rowid" (ByVal hDB As LongPtr, ByVal iRow As Currency) As Long
 Public Declare PtrSafe Function stub_sqlite3_setlk_timeout CDecl Lib sqlite3 Alias "sqlite3_setlk_timeout" (ByVal hDB As LongPtr, ByVal Milliseconds As Long, ByVal Flags As Long) As Long
 Public Declare PtrSafe Function stub_sqlite3_shutdown CDecl Lib sqlite3 Alias "sqlite3_shutdown" () As Long
@@ -381,6 +383,7 @@ Private Declare Function sqlite3_db_name Lib "sqlite3win32.dll" (ByVal hDB As Lo
 Private Declare Function sqlite3_db_readonly Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzDbName As Long) As Long
 Private Declare Function sqlite3_db_release_memory Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
 Private Declare Function sqlite3_db_status Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal StatusOpt As Long, ByVal pCurrent As Long, ByVal pHighwater As Long, ByVal ResetFlag As Long) As Long
+Private Declare Function sqlite3_db_status64 Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal StatusOpt As Long, ByVal pCurrent As Long, ByVal pHighwater As Long, ByVal ResetFlag As Long) As Long
 Private Declare Function sqlite3_declare_vtab Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzCreateTable As Long) As Long
 Private Declare Function sqlite3_deserialize Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzSchema As Long, ByVal pData As Long, ByVal szDB As Currency, ByVal szBuffer As Currency, ByVal Flags As Long) As Long
 Private Declare Function sqlite3_drop_modules Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal azKeep As Long) As Long
@@ -478,6 +481,7 @@ Private Declare Function sqlite3_rtree_query_callback Lib "sqlite3win32.dll" (By
 Private Declare Function sqlite3_set_authorizer Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal lpfnAuth As Long, ByVal pArg As Long) As Long
 Private Declare Function sqlite3_set_auxdata Lib "sqlite3win32.dll" (ByVal pCtx As Long, ByVal iArg As Long, ByVal pAux As Long, ByVal lpfnDestroy As Long) As Long
 Private Declare Function sqlite3_set_clientdata Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzName As Long, ByVal pData As Long, ByVal lpfnDestroy As Long) As Long
+Private Declare Function sqlite3_set_errmsg Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal ErrCode As Long, ByVal pzErrMsg As Long) As Long
 Private Declare Function sqlite3_set_last_insert_rowid Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal iRow As Currency) As Long
 Private Declare Function sqlite3_setlk_timeout Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal Milliseconds As Long, ByVal Flags As Long) As Long
 Private Declare Function sqlite3_shutdown Lib "sqlite3win32.dll" () As Long
@@ -912,6 +916,10 @@ Public Function stub_sqlite3_db_status(ByVal hDB As Long, ByVal StatusOpt As Lon
 stub_sqlite3_db_status = sqlite3_db_status(hDB, StatusOpt, pCurrent, pHighwater, ResetFlag)
 End Function
 
+Public Function stub_sqlite3_db_status64(ByVal hDB As Long, ByVal StatusOpt As Long, ByVal pCurrent As Long, ByVal pHighwater As Long, ByVal ResetFlag As Long) As Long
+stub_sqlite3_db_status64 = sqlite3_db_status64(hDB, StatusOpt, pCurrent, pHighwater, ResetFlag)
+End Function
+
 Public Function stub_sqlite3_declare_vtab(ByVal hDB As Long, ByVal pzCreateTable As Long) As Long
 stub_sqlite3_declare_vtab = sqlite3_declare_vtab(hDB, pzCreateTable)
 End Function
@@ -1298,6 +1306,10 @@ End Function
 
 Public Function stub_sqlite3_set_clientdata(ByVal hDB As Long, ByVal pzName As Long, ByVal pData As Long, ByVal lpfnDestroy As Long) As Long
 stub_sqlite3_set_clientdata = sqlite3_set_clientdata(hDB, pzName, pData, lpfnDestroy)
+End Function
+
+Public Function stub_sqlite3_set_errmsg(ByVal hDB As Long, ByVal ErrCode As Long, ByVal pzErrMsg As Long) As Long
+stub_sqlite3_set_errmsg = sqlite3_set_errmsg(hDB, ErrCode, pzErrMsg)
 End Function
 
 Public Function stub_sqlite3_set_last_insert_rowid(ByVal hDB As Long, ByVal iRow As Currency) As Long
