@@ -26,13 +26,14 @@ Private Const PTR_SIZE As Long = 4
 #End If
 #If VBA7 Then
 Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
-Private Declare PtrSafe Function VarI8FromDec Lib "oleaut32" (ByRef iDecIn As Variant, ByRef i64Out As Currency) As Long
+Private Declare PtrSafe Function VarI8FromDec Lib "oleaut32" (ByRef pDecIn As Variant, ByRef i64Out As Currency) As Long
 #Else
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
-Private Declare Function VarI8FromDec Lib "oleaut32" (ByRef iDecIn As Variant, ByRef i64Out As Currency) As Long
+Private Declare Function VarI8FromDec Lib "oleaut32" (ByRef pDecIn As Variant, ByRef i64Out As Currency) As Long
 #End If
 Private Const VT_BYREF As Integer = &H4000
 Private Const VT_I8 As Integer = &H14
+Private Const DISP_E_OVERFLOW As Long = &H8002000A
 Private PropHandle As LongPtr
 Private PropDBConnection As SQLiteConnection
 
@@ -108,13 +109,20 @@ Select Case VT
         Dim Int64 As Currency
         Select Case VT
             Case vbDecimal
-                VarI8FromDec Value, Int64
+                If VarI8FromDec(Value, Int64) = DISP_E_OVERFLOW Then Err.Raise 6
                 Result = stub_sqlite3_bind_int64(PropHandle, Index, Int64)
             Case vbCurrency
                 Int64 = Value / 10000@
                 Result = stub_sqlite3_bind_int64(PropHandle, Index, Int64)
             Case VT_I8
-                CopyMemory Int64, ByVal UnsignedAdd(VarPtr(Value), 8), 8
+                CopyMemory VT, ByVal VarPtr(Value), 2
+                If (VT And VT_BYREF) = VT_BYREF Then
+                    Dim pData As LongPtr
+                    CopyMemory pData, ByVal UnsignedAdd(VarPtr(Value), 8), PTR_SIZE
+                    CopyMemory Int64, ByVal pData, 8
+                Else
+                    CopyMemory Int64, ByVal UnsignedAdd(VarPtr(Value), 8), 8
+                End If
                 Result = stub_sqlite3_bind_int64(PropHandle, Index, Int64)
             Case vbLong, vbInteger, vbByte
                 Result = stub_sqlite3_bind_int(PropHandle, Index, Value)

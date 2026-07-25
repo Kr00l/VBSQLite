@@ -35,13 +35,16 @@ End Enum
 #If VBA7 Then
 Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare PtrSafe Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
-Private Declare PtrSafe Function VarI8FromDec Lib "oleaut32" (ByRef iDecIn As Variant, ByRef i64Out As Currency) As Long
+Private Declare PtrSafe Function VarI8FromDec Lib "oleaut32" (ByRef pDecIn As Variant, ByRef i64Out As Currency) As Long
+Private Declare PtrSafe Function VarI8FromR8 Lib "oleaut32" (ByVal DblIn As Double, ByRef i64Out As Currency) As Long
 #Else
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
-Private Declare Function VarI8FromDec Lib "oleaut32" (ByRef iDecIn As Variant, ByRef i64Out As Currency) As Long
+Private Declare Function VarI8FromDec Lib "oleaut32" (ByRef pDecIn As Variant, ByRef i64Out As Currency) As Long
+Private Declare Function VarI8FromR8 Lib "oleaut32" (ByVal DblIn As Double, ByRef i64Out As Currency) As Long
 #End If
 Private Const VT_I8 As Integer = &H14
+Private Const DISP_E_OVERFLOW As Long = &H8002000A
 Private PropHandle As LongPtr
 
 Private Sub Class_Initialize()
@@ -175,25 +178,24 @@ End Property
 
 Public Property Let LastInsertRowID(ByVal Value As Variant)
 If PropHandle = NULL_PTR Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
-Dim VT As Integer
-VT = VarType(Value)
-Select Case VT
-    Case vbDecimal, vbCurrency, VT_I8, vbLong, vbInteger, vbByte
-        Dim Int64 As Currency
-        Select Case VT
-            Case vbDecimal
-                VarI8FromDec Value, Int64
-            Case vbCurrency
-                Int64 = Value / 10000@
-            Case VT_I8
-                CopyMemory Int64, ByVal UnsignedAdd(VarPtr(Value), 8), 8
-            Case vbLong, vbInteger, vbByte
-                Int64 = Value / 10000@
-        End Select
-        stub_sqlite3_set_last_insert_rowid PropHandle, Int64
+Dim Int64 As Currency
+Select Case VarType(Value)
+    Case vbDecimal
+        If VarI8FromDec(Value, Int64) = DISP_E_OVERFLOW Then Err.Raise 6
+    Case vbCurrency
+        Int64 = Value / 10000@
+    Case VT_I8
+        CopyMemory Int64, ByVal UnsignedAdd(VarPtr(Value), 8), 8
+    Case vbLong, vbInteger, vbByte
+        Int64 = Value / 10000@
+    Case vbDouble
+        If VarI8FromR8(Value, Int64) = DISP_E_OVERFLOW Then Err.Raise 6
+    Case vbEmpty
+        Int64 = 0@
     Case Else
         Err.Raise 380
 End Select
+stub_sqlite3_set_last_insert_rowid PropHandle, Int64
 End Property
 
 Public Property Get AutoCommit() As Boolean
