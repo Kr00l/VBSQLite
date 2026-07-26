@@ -37,13 +37,16 @@ Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByR
 Private Declare PtrSafe Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
 Private Declare PtrSafe Function VarI8FromDec Lib "oleaut32" (ByRef pDecIn As Variant, ByRef i64Out As Currency) As Long
 Private Declare PtrSafe Function VarI8FromR8 Lib "oleaut32" (ByVal DblIn As Double, ByRef i64Out As Currency) As Long
+Private Declare PtrSafe Function VarI8FromStr Lib "oleaut32" (ByVal lpStrIn As LongPtr, ByVal LCID As Long, ByVal dwFlags As Long, ByRef i64Out As Currency) As Long
 #Else
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
 Private Declare Function VarI8FromDec Lib "oleaut32" (ByRef pDecIn As Variant, ByRef i64Out As Currency) As Long
 Private Declare Function VarI8FromR8 Lib "oleaut32" (ByVal DblIn As Double, ByRef i64Out As Currency) As Long
+Private Declare Function VarI8FromStr Lib "oleaut32" (ByVal lpStrIn As Long, ByVal LCID As Long, ByVal dwFlags As Long, ByRef i64Out As Currency) As Long
 #End If
 Private Const VT_I8 As Integer = &H14
+Private Const DISP_E_TYPEMISMATCH As Long = &H80020005
 Private Const DISP_E_OVERFLOW As Long = &H8002000A
 Private PropHandle As LongPtr
 
@@ -190,6 +193,13 @@ Select Case VarType(Value)
         Int64 = Value / 10000@
     Case vbDouble
         If VarI8FromR8(Value, Int64) = DISP_E_OVERFLOW Then Err.Raise 6
+    Case vbString
+        Select Case VarI8FromStr(StrPtr(Value), 0, 0, Int64)
+            Case DISP_E_TYPEMISMATCH
+                Err.Raise 13
+            Case DISP_E_OVERFLOW
+                Err.Raise 6
+        End Select
     Case vbEmpty
         Int64 = 0@
     Case Else
