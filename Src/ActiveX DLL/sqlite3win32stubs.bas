@@ -95,6 +95,7 @@ Public Declare PtrSafe Function stub_sqlite3_database_file_object CDecl Lib sqli
 Public Declare PtrSafe Function stub_sqlite3_data_count CDecl Lib sqlite3 Alias "sqlite3_data_count" (ByVal hStmt As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_db_cacheflush CDecl Lib sqlite3 Alias "sqlite3_db_cacheflush" (ByVal hDB As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_db_config CDecl Lib sqlite3 Alias "sqlite3_db_config" (ByVal hDB As LongPtr, ByVal i As Long, ByVal ParamArray Args As Any()) As Long
+Public Declare PtrSafe Function stub_sqlite3_db_config_fp_digits CDecl Lib sqlite3 Alias "sqlite3_db_config_fp_digits" (ByVal hDB As LongPtr, ByVal NewDigits As Long, ByVal pOldDigits As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_db_filename CDecl Lib sqlite3 Alias "sqlite3_db_filename" (ByVal hDB As LongPtr, ByVal pzDbName As LongPtr) As LongPtr
 Public Declare PtrSafe Function stub_sqlite3_db_handle CDecl Lib sqlite3 Alias "sqlite3_db_handle" (ByVal hStmt As LongPtr) As LongPtr
 Public Declare PtrSafe Function stub_sqlite3_db_mutex CDecl Lib sqlite3 Alias "sqlite3_db_mutex" (ByVal hDB As LongPtr) As LongPtr
@@ -378,6 +379,7 @@ Private Declare Function sqlite3_create_window_function Lib "sqlite3win32.dll" (
 Private Declare Function sqlite3_database_file_object Lib "sqlite3win32.dll" (ByVal pzName As Long) As Long
 Private Declare Function sqlite3_data_count Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
 Private Declare Function sqlite3_db_cacheflush Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
+Private Declare Function sqlite3_db_config_fp_digits Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal NewDigits As Long, ByVal pOldDigits As Long) As Long
 Private Declare Function sqlite3_db_filename Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal pzDbName As Long) As Long
 Private Declare Function sqlite3_db_handle Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
 Private Declare Function sqlite3_db_mutex Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
@@ -890,6 +892,10 @@ End Function
 
 Public Function stub_sqlite3_db_cacheflush(ByVal hDB As Long) As Long
 stub_sqlite3_db_cacheflush = sqlite3_db_cacheflush(hDB)
+End Function
+
+Public Function stub_sqlite3_db_config_fp_digits(ByVal hDB As Long, ByVal NewDigits As Long, ByVal pOldDigits As Long) As Long
+stub_sqlite3_db_config_fp_digits = sqlite3_db_config_fp_digits(hDB, NewDigits, pOldDigits)
 End Function
 
 Public Function stub_sqlite3_db_filename(ByVal hDB As Long, ByVal pzDbName As Long) As Long
