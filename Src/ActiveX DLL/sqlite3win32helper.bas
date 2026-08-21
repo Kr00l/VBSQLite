@@ -149,6 +149,7 @@ Public Const SQLITE_UTF16BE As Long = 3
 Public Const SQLITE_UTF16 As Long = 4
 Public Const SQLITE_ANY As Long = 5                                 ' Deprecated
 Public Const SQLITE_UTF16_ALIGNED As Long = 8
+Public Const SQLITE_UTF8_ZT As Long = 16
 
 ' Function Flags
 Public Const SQLITE_DETERMINISTIC As Long = &H800
@@ -298,6 +299,7 @@ Public Const SQLITE_DBCONFIG_REVERSE_SCANORDER As Long = 1019
 Public Const SQLITE_DBCONFIG_ENABLE_ATTACH_CREATE As Long = 1020
 Public Const SQLITE_DBCONFIG_ENABLE_ATTACH_WRITE As Long = 1021
 Public Const SQLITE_DBCONFIG_ENABLE_COMMENTS As Long = 1022
+Public Const SQLITE_DBCONFIG_FP_DIGITS As Long = 1023
 
 ' Authorizer Return Codes
 Public Const SQLITE_DENY As Long = 1
@@ -358,12 +360,14 @@ Public Const SQLITE_LIMIT_LIKE_PATTERN_LENGTH As Long = 8
 Public Const SQLITE_LIMIT_VARIABLE_NUMBER As Long = 9
 Public Const SQLITE_LIMIT_TRIGGER_DEPTH As Long = 10
 Public Const SQLITE_LIMIT_WORKER_THREADS As Long = 11
+Public Const SQLITE_LIMIT_PARSER_DEPTH As Long = 12
 
 ' Prepare Flags
 Public Const SQLITE_PREPARE_PERSISTENT As Long = &H1
 Public Const SQLITE_PREPARE_NORMALIZE As Long = &H2
 Public Const SQLITE_PREPARE_NO_VTAB As Long = &H4
 Public Const SQLITE_PREPARE_DONT_LOG As Long = &H10
+Public Const SQLITE_PREPARE_FROM_DDL As Long = &H20
 
 ' Transaction States
 Public Const SQLITE_TXN_NONE As Long = 0

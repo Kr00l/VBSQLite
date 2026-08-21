@@ -226,9 +226,11 @@ Public Declare PtrSafe Function stub_sqlite3_str_appendchar CDecl Lib sqlite3 Al
 Public Declare PtrSafe Function stub_sqlite3_str_appendf CDecl Lib sqlite3 Alias "sqlite3_str_appendf" (ByVal pStr As LongPtr, ByVal pzFormat As LongPtr, ByVal ParamArray Args As Any()) As Long
 Public Declare PtrSafe Function stub_sqlite3_str_errcode CDecl Lib sqlite3 Alias "sqlite3_str_errcode" (ByVal pStr As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_str_finish CDecl Lib sqlite3 Alias "sqlite3_str_finish" (ByVal pStr As LongPtr) As LongPtr
+Public Declare PtrSafe Function stub_sqlite3_str_free CDecl Lib sqlite3 Alias "sqlite3_str_free" (ByVal pStr As LongPtr) As LongPtr
 Public Declare PtrSafe Function stub_sqlite3_str_length CDecl Lib sqlite3 Alias "sqlite3_str_length" (ByVal pStr As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_str_new CDecl Lib sqlite3 Alias "sqlite3_str_new" (ByVal hDB As LongPtr) As LongPtr
 Public Declare PtrSafe Function stub_sqlite3_str_reset CDecl Lib sqlite3 Alias "sqlite3_str_reset" (ByVal pStr As LongPtr) As Long
+Public Declare PtrSafe Function stub_sqlite3_str_truncate CDecl Lib sqlite3 Alias "sqlite3_str_truncate" (ByVal pStr As LongPtr, ByVal n As Long) As Long
 Public Declare PtrSafe Function stub_sqlite3_str_value CDecl Lib sqlite3 Alias "sqlite3_str_value" (ByVal pStr As LongPtr) As LongPtr
 Public Declare PtrSafe Function stub_sqlite3_str_vappendf CDecl Lib sqlite3 Alias "sqlite3_str_vappendf" (ByVal pStr As LongPtr, ByVal pzFormat As LongPtr, ByRef ParamArray Args As Any()) As Long
 Public Declare PtrSafe Function stub_sqlite3_strglob CDecl Lib sqlite3 Alias "sqlite3_strglob" (ByVal pzGlobPattern As LongPtr, ByVal pzString As LongPtr) As Long
@@ -503,9 +505,11 @@ Private Declare Function sqlite3_str_appendall Lib "sqlite3win32.dll" (ByVal pSt
 Private Declare Function sqlite3_str_appendchar Lib "sqlite3win32.dll" (ByVal pStr As Long, ByVal n As Long, ByVal c As Byte) As Long
 Private Declare Function sqlite3_str_errcode Lib "sqlite3win32.dll" (ByVal pStr As Long) As Long
 Private Declare Function sqlite3_str_finish Lib "sqlite3win32.dll" (ByVal pStr As Long) As Long
+Private Declare Function sqlite3_str_free Lib "sqlite3win32.dll" (ByVal pStr As Long) As Long
 Private Declare Function sqlite3_str_length Lib "sqlite3win32.dll" (ByVal pStr As Long) As Long
 Private Declare Function sqlite3_str_new Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
 Private Declare Function sqlite3_str_reset Lib "sqlite3win32.dll" (ByVal pStr As Long) As Long
+Private Declare Function sqlite3_str_truncate Lib "sqlite3win32.dll" (ByVal pStr As Long, ByVal n As Long) As Long
 Private Declare Function sqlite3_str_value Lib "sqlite3win32.dll" (ByVal pStr As Long) As Long
 Private Declare Function sqlite3_strglob Lib "sqlite3win32.dll" (ByVal pzGlobPattern As Long, ByVal pzString As Long) As Long
 Private Declare Function sqlite3_stricmp Lib "sqlite3win32.dll" (ByVal pzLeft As Long, ByVal pzRight As Long) As Long
@@ -1396,6 +1400,10 @@ Public Function stub_sqlite3_str_finish(ByVal pStr As Long) As Long
 stub_sqlite3_str_finish = sqlite3_str_finish(pStr)
 End Function
 
+Public Function stub_sqlite3_str_free(ByVal pStr As Long) As Long
+stub_sqlite3_str_free = sqlite3_str_free(pStr)
+End Function
+
 Public Function stub_sqlite3_str_length(ByVal pStr As Long) As Long
 stub_sqlite3_str_length = sqlite3_str_length(pStr)
 End Function
@@ -1406,6 +1414,10 @@ End Function
 
 Public Function stub_sqlite3_str_reset(ByVal pStr As Long) As Long
 stub_sqlite3_str_reset = sqlite3_str_reset(pStr)
+End Function
+
+Public Function stub_sqlite3_str_truncate(ByVal pStr As Long, ByVal n As Long) As Long
+stub_sqlite3_str_truncate = sqlite3_str_truncate(pStr, n)
 End Function
 
 Public Function stub_sqlite3_str_value(ByVal pStr As Long) As Long
