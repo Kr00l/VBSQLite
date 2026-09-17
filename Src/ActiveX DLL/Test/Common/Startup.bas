@@ -25,12 +25,12 @@ Private Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) A
 Sub Main()
 If App.PrevInstance = True And InIDE() = False Then
     Dim hWnd As LongPtr
-    hWnd = FindWindow(StrPtr("ThunderRT6FormDC"), StrPtr("VBSQLite10 Test"))
+    hWnd = FindWindow(StrPtr("ThunderRT6FormDC"), StrPtr("VBSQLite12 Test"))
     If hWnd <> NULL_PTR Then
         Const SW_RESTORE As Long = 9
         ShowWindow hWnd, SW_RESTORE
         SetForegroundWindow hWnd
-        AppActivate "VBSQLite10 Test"
+        AppActivate "VBSQLite12 Test"
     End If
 Else
     MainForm.Show vbModeless
