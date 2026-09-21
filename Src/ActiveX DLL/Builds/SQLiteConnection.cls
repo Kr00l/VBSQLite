@@ -161,10 +161,17 @@ Else
 End If
 End Property
 
-Public Property Get AffectedRows() As Long
+Public Property Get AffectedRows() As Variant
 Attribute AffectedRows.VB_Description = "Returns the number of rows modified, inserted or deleted by the most recently completed SQL statement. The value returned by this function will not change by read-only SQL statements."
 If PropHandle = NULL_PTR Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
-AffectedRows = stub_sqlite3_changes(PropHandle)
+Dim Int64 As Currency
+Int64 = stub_sqlite3_changes64(PropHandle)
+If Int64 >= -214748.3648@ And Int64 <= 214748.3647@ Then
+    AffectedRows = CLng(Int64 * 10000@)
+Else
+    AffectedRows = CDec(0)
+    VarDecFromI8 Int64, AffectedRows
+End If
 End Property
 
 Public Property Get LastInsertRowID() As Variant
