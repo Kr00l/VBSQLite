@@ -235,6 +235,12 @@ Result = stub_sqlite3_exec(PropHandle, VarPtr(SQLUTF8(0)), NULL_PTR, NULL_PTR, N
 If Result <> SQLITE_OK Then Err.Raise Number:=vbObjectError + stub_sqlite3_errcode(PropHandle), Description:=SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(PropHandle))
 End Sub
 
+Public Sub Cancel()
+Attribute Cancel.VB_Description = "Call this method from another thread to cancel (interrupt) any currently executing SQLite database operation."
+If PropHandle = NULL_PTR Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
+stub_sqlite3_interrupt PropHandle
+End Sub
+
 Public Function OpenDataSet(ByVal SQL As String) As SQLiteDataSet
 Attribute OpenDataSet.VB_Description = "Runs a SQL query and returns a reference to a SQLiteDataSet object."
 If PropHandle = NULL_PTR Then Err.Raise Number:=5, Description:="DB connection must be opened before it can be used"
