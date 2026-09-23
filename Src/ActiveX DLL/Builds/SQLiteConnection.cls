@@ -82,49 +82,51 @@ Attribute Version.VB_Description = "Returns the version of the SQLite library."
 Version = SQLiteUTF8PtrToStr(stub_sqlite3_libversion())
 End Property
 
-Public Sub OpenDB(ByVal FileName As String, Optional ByVal Mode As SQLiteOpenMode = SQLiteReadWriteCreate, Optional ByVal SharedCache As Boolean)
+Public Sub OpenDB(ByVal FileName As String, Optional ByVal Mode As SQLiteOpenMode = SQLiteReadWriteCreate, Optional ByVal SharedCache As Boolean, Optional ByVal BusyTimeOut As Double)
 Attribute OpenDB.VB_Description = "Opens the SQLite database connection."
 Select Case Mode
     Case SQLiteReadOnly, SQLiteReadWrite, SQLiteReadWriteCreate
-        If PropHandle <> NULL_PTR Then
-            stub_sqlite3_close_v2 PropHandle
-            PropHandle = NULL_PTR
-        End If
-        Dim FileNameUTF8() As Byte, Flags As Long, Result As Long
-        FileNameUTF8() = UTF16_To_UTF8(FileName & vbNullChar)
-        Flags = SQLITE_OPEN_FULLMUTEX
-        Select Case Mode
-            Case SQLiteReadOnly
-                Flags = Flags Or SQLITE_OPEN_READONLY
-            Case SQLiteReadWrite
-                Flags = Flags Or SQLITE_OPEN_READWRITE
-            Case SQLiteReadWriteCreate
-                Flags = Flags Or SQLITE_OPEN_READWRITE Or SQLITE_OPEN_CREATE
-        End Select
-        If SharedCache = False Then
-            Flags = Flags Or SQLITE_OPEN_PRIVATECACHE
-        Else
-            Flags = Flags Or SQLITE_OPEN_SHAREDCACHE
-        End If
-        Result = stub_sqlite3_open_v2(VarPtr(FileNameUTF8(0)), PropHandle, Flags, NULL_PTR)
-        If Result <> SQLITE_OK Then
-            Dim ErrVal As Long, ErrMsg As String
-            If PropHandle <> NULL_PTR Then
-                ErrVal = stub_sqlite3_errcode(PropHandle)
-                ErrMsg = SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(PropHandle))
-                stub_sqlite3_close_v2 PropHandle
-                PropHandle = NULL_PTR
-            End If
-            Err.Raise Number:=vbObjectError + ErrVal, Description:=ErrMsg
-        Else
-            stub_sqlite3_db_config_fp_digits PropHandle, 15, NULL_PTR
-            stub_sqlite3_regexp_init PropHandle, NULL_PTR, NULL_PTR
-            Call SQLiteOverloadBuiltinFunctions(PropHandle)
-            Call SQLiteCreateFunctions(PropHandle)
-        End If
     Case Else
         Err.Raise 380
 End Select
+If BusyTimeOut < 0 Or BusyTimeOut > 2147483.647 Then Err.Raise 380
+If PropHandle <> NULL_PTR Then
+    stub_sqlite3_close_v2 PropHandle
+    PropHandle = NULL_PTR
+End If
+Dim FileNameUTF8() As Byte, Flags As Long, Result As Long
+FileNameUTF8() = UTF16_To_UTF8(FileName & vbNullChar)
+Flags = SQLITE_OPEN_FULLMUTEX
+Select Case Mode
+    Case SQLiteReadOnly
+        Flags = Flags Or SQLITE_OPEN_READONLY
+    Case SQLiteReadWrite
+        Flags = Flags Or SQLITE_OPEN_READWRITE
+    Case SQLiteReadWriteCreate
+        Flags = Flags Or SQLITE_OPEN_READWRITE Or SQLITE_OPEN_CREATE
+End Select
+If SharedCache = False Then
+    Flags = Flags Or SQLITE_OPEN_PRIVATECACHE
+Else
+    Flags = Flags Or SQLITE_OPEN_SHAREDCACHE
+End If
+Result = stub_sqlite3_open_v2(VarPtr(FileNameUTF8(0)), PropHandle, Flags, NULL_PTR)
+If Result <> SQLITE_OK Then
+    Dim ErrVal As Long, ErrMsg As String
+    If PropHandle <> NULL_PTR Then
+        ErrVal = stub_sqlite3_errcode(PropHandle)
+        ErrMsg = SQLiteUTF8PtrToStr(stub_sqlite3_errmsg(PropHandle))
+        stub_sqlite3_close_v2 PropHandle
+        PropHandle = NULL_PTR
+    End If
+    Err.Raise Number:=vbObjectError + ErrVal, Description:=ErrMsg
+Else
+    stub_sqlite3_db_config_fp_digits PropHandle, 15, NULL_PTR
+    stub_sqlite3_regexp_init PropHandle, NULL_PTR, NULL_PTR
+    Call SQLiteOverloadBuiltinFunctions(PropHandle)
+    Call SQLiteCreateFunctions(PropHandle)
+    If BusyTimeOut > 0.0005 Then stub_sqlite3_busy_timeout PropHandle, CLng(BusyTimeOut * 1000#)
+End If
 End Sub
 
 Public Sub CloseDB()
