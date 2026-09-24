@@ -125,7 +125,7 @@ Else
     stub_sqlite3_regexp_init PropHandle, NULL_PTR, NULL_PTR
     Call SQLiteOverloadBuiltinFunctions(PropHandle)
     Call SQLiteCreateFunctions(PropHandle)
-    If BusyTimeOut > 0.0005 Then stub_sqlite3_busy_timeout PropHandle, CLng(BusyTimeOut * 1000#)
+    If BusyTimeOut > 0.0005 Then stub_sqlite3_busy_timeout PropHandle, CLng(Round(BusyTimeOut * 1000#, 3))
 End If
 End Sub
 

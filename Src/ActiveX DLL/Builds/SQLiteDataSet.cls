@@ -32,10 +32,13 @@ Private Type TRECORDS
 Rows() As TCOLS
 End Type
 #If VBA7 Then
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare PtrSafe Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
 #Else
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
 #End If
+Private Const VT_BYREF As Integer = &H4000
 Private PropColumns As SQLiteColumns
 Private PropValues As TRECORDS
 Private PropRecordCount(0 To 1) As Long
@@ -193,3 +196,91 @@ ElseIf NumRecords < 0 Then
     End If
 End If
 End Sub
+
+Public Function GetRows(Optional ByVal Rows As Long = -1, Optional ByVal Cols As Long = -1, Optional ByVal Row As Long = -1, Optional ByVal Col As Long = -1, Optional ByVal DataCols As Variant) As Variant
+Attribute GetRows.VB_Description = "Copies the content into an two-dimensional variant array."
+If Rows < -1 Then Err.Raise 380
+If Cols < -1 Then Err.Raise 380
+If Row < -1 Then Err.Raise 380
+If Col < -1 Then Err.Raise 380
+If Row = -1 Then
+    Row = Me.Position - 1
+    If Row < 0 Then Err.Raise Number:=vbObjectError, Description:="Either BOF or EOF is True"
+Else
+    If (Row < 0 Or Row > (PropRecordCount(0) - 1)) Then Err.Raise Number:=381, Description:="Subscript out of range"
+End If
+If Rows = -1 Then Rows = PropRecordCount(0) - Row
+If Rows > 0 Then
+    If Rows > (PropRecordCount(0) - Row) Then Rows = PropRecordCount(0) - Row
+    Dim LBoundDataCols As Long, UBoundDataCols As Long
+    UBoundDataCols = -1
+    If Not IsMissing(DataCols) Then
+        Dim DataColIndices() As Long, i As Long, j As Long
+        If IsArray(DataCols) Then
+            Dim Ptr As LongPtr
+            CopyMemory Ptr, ByVal UnsignedAdd(VarPtr(DataCols), 8), PTR_SIZE
+            Dim VT As Integer
+            CopyMemory VT, ByVal VarPtr(DataCols), 2
+            If (VT And VT_BYREF) = VT_BYREF Then CopyMemory Ptr, ByVal Ptr, PTR_SIZE
+            If Ptr <> NULL_PTR Then
+                Dim DimensionCountDataCols As Integer
+                CopyMemory DimensionCountDataCols, ByVal Ptr, 2
+                If DimensionCountDataCols = 1 Then
+                    LBoundDataCols = LBound(DataCols)
+                    UBoundDataCols = UBound(DataCols)
+                Else
+                    Err.Raise Number:=5, Description:="Array must be single dimensioned"
+                End If
+            Else
+                Err.Raise Number:=91, Description:="Array is not allocated"
+            End If
+            ReDim DataColIndices(LBoundDataCols To UBoundDataCols) As Long
+            For i = LBoundDataCols To UBoundDataCols
+                If VarType(DataCols(i)) = vbString Then
+                    For j = 0 To (PropColumns.Count - 1)
+                        If StrComp(PropColumns(j + 1).Name, DataCols(i), vbTextCompare) = 0 Then DataColIndices(i) = j: Exit For
+                    Next j
+                    If j > (PropColumns.Count - 1) Then Err.Raise 381
+                Else
+                    DataColIndices(i) = DataCols(i)
+                    If DataColIndices(i) < 0 Or DataColIndices(i) > (PropColumns.Count - 1) Then Err.Raise 381
+                End If
+            Next i
+        Else
+            LBoundDataCols = 0
+            UBoundDataCols = 0
+            ReDim DataColIndices(0) As Long
+            If VarType(DataCols) = vbString Then
+                For j = 0 To (PropColumns.Count - 1)
+                    If StrComp(PropColumns(j + 1).Name, DataCols, vbTextCompare) = 0 Then DataColIndices(0) = j: Exit For
+                Next j
+                If j > (PropColumns.Count - 1) Then Err.Raise 381
+            Else
+                DataColIndices(0) = DataCols
+                If DataColIndices(0) < 0 Or DataColIndices(0) > (PropColumns.Count - 1) Then Err.Raise 381
+            End If
+        End If
+    End If
+    Dim ArrRows() As Variant, iRow As Long, iCol As Long
+    If (UBoundDataCols - LBoundDataCols) > -1 Then
+        If Cols <> -1 Or Col <> -1 Then Err.Raise Number:=5, Description:="Cols and Col must be -1 when DataCols is supplied"
+        ReDim ArrRows(0 To (UBoundDataCols - LBoundDataCols), 0 To (Rows - 1)) As Variant
+        For iCol = 0 To (UBoundDataCols - LBoundDataCols): For iRow = 0 To (Rows - 1)
+            ArrRows(iCol, iRow) = PropValues.Rows(iRow + Row).Cols(DataColIndices(LBoundDataCols + iCol))
+        Next iRow, iCol
+        GetRows = ArrRows
+    Else
+        If Col = -1 Then Col = 0
+        If (Col < 0 Or Col > (PropRecordCount(1) - 1)) Then Err.Raise Number:=381, Description:="Subscript out of range"
+        If Cols = -1 Then Cols = PropRecordCount(1) - Col
+        If Cols > 0 Then
+            If Cols > (PropRecordCount(1) - Col) Then Cols = PropRecordCount(1) - Col
+            ReDim ArrRows(0 To (Cols - 1), 0 To (Rows - 1)) As Variant
+            For iCol = 0 To (Cols - 1): For iRow = 0 To (Rows - 1)
+                ArrRows(iCol, iRow) = PropValues.Rows(iRow + Row).Cols(iCol + Col)
+            Next iRow, iCol
+            GetRows = ArrRows
+        End If
+    End If
+End If
+End Function
