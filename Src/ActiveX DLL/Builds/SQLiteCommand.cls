@@ -135,7 +135,7 @@ Select Case VT
         Else
             Result = stub_sqlite3_bind_text16(PropHandle, Index, StrPtr(""), 0, SQLITE_TRANSIENT)
         End If
-    Case vbArray + vbByte ' SQLITE_BLOB
+    Case (vbArray + vbByte) ' SQLITE_BLOB
         Dim pArray As LongPtr, pvData As LongPtr
         CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value), 8), PTR_SIZE
         CopyMemory VT, ByVal VarPtr(Value), 2
