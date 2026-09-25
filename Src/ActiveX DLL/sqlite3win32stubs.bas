@@ -209,7 +209,6 @@ Public Declare PtrSafe Function stub_sqlite3_setlk_timeout CDecl Lib sqlite3 Ali
 Public Declare PtrSafe Function stub_sqlite3_shutdown CDecl Lib sqlite3 Alias "sqlite3_shutdown" () As Long
 Public Declare PtrSafe Function stub_sqlite3_sleep CDecl Lib sqlite3 Alias "sqlite3_sleep" (ByVal dwMilliseconds As Long) As Long
 Public Declare PtrSafe Function stub_sqlite3_snprintf CDecl Lib sqlite3 Alias "sqlite3_snprintf" (ByVal n As Long, ByVal pzBuffer As LongPtr, ByVal pzFormat As LongPtr, ByVal ParamArray Args As Any()) As LongPtr
-Public Declare PtrSafe Sub stub_sqlite3_soft_heap_limit CDecl Lib sqlite3 Alias "sqlite3_soft_heap_limit" (ByVal n As Long)
 Public Declare PtrSafe Function stub_sqlite3_soft_heap_limit64 CDecl Lib sqlite3 Alias "sqlite3_soft_heap_limit64" (ByVal n As Currency) As Currency
 Public Declare PtrSafe Function stub_sqlite3_sourceid CDecl Lib sqlite3 Alias "sqlite3_sourceid" () As LongPtr
 Public Declare PtrSafe Function stub_sqlite3_sql CDecl Lib sqlite3 Alias "sqlite3_sql" (ByVal hStmt As LongPtr) As LongPtr
@@ -490,7 +489,6 @@ Private Declare Sub sqlite3_set_last_insert_rowid Lib "sqlite3win32.dll" (ByVal 
 Private Declare Function sqlite3_setlk_timeout Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal Milliseconds As Long, ByVal Flags As Long) As Long
 Private Declare Function sqlite3_shutdown Lib "sqlite3win32.dll" () As Long
 Private Declare Function sqlite3_sleep Lib "sqlite3win32.dll" (ByVal dwMilliseconds As Long) As Long
-Private Declare Sub sqlite3_soft_heap_limit Lib "sqlite3win32.dll" (ByVal n As Long)
 Private Declare Function sqlite3_soft_heap_limit64 Lib "sqlite3win32.dll" (ByVal n As Currency) As Currency
 Private Declare Function sqlite3_sourceid Lib "sqlite3win32.dll" () As Long
 Private Declare Function sqlite3_sql Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
@@ -1337,10 +1335,6 @@ End Function
 Public Function stub_sqlite3_sleep(ByVal dwMilliseconds As Long) As Long
 stub_sqlite3_sleep = sqlite3_sleep(dwMilliseconds)
 End Function
-
-Public Sub stub_sqlite3_soft_heap_limit(ByVal n As Long)
-sqlite3_soft_heap_limit n
-End Sub
 
 Public Function stub_sqlite3_soft_heap_limit64(ByVal n As Currency) As Currency
 stub_sqlite3_soft_heap_limit64 = sqlite3_soft_heap_limit64(n)
