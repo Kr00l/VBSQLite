@@ -139,8 +139,13 @@ Public Const SQLITE_BLOB As Long = 4
 Public Const SQLITE_NULL As Long = 5
 
 ' Special Destructor Behavior Constants
-Public Const SQLITE_STATIC As Long = &H0
-Public Const SQLITE_TRANSIENT As Long = &HFFFFFFFF
+#If VBA7 Then
+Public Const SQLITE_STATIC As LongPtr = 0
+Public Const SQLITE_TRANSIENT As LongPtr = (-1)
+#Else
+Public Const SQLITE_STATIC As Long = 0
+Public Const SQLITE_TRANSIENT As Long = (-1)
+#End If
 
 ' Text Encodings
 Public Const SQLITE_UTF8 As Long = 1
