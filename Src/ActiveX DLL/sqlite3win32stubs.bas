@@ -46,6 +46,8 @@ Public Declare PtrSafe Function stub_sqlite3_blob_write CDecl Lib sqlite3 Alias 
 Public Declare PtrSafe Function stub_sqlite3_busy_handler CDecl Lib sqlite3 Alias "sqlite3_busy_handler" (ByVal hDB As LongPtr, ByVal lpfnBusy As LongPtr, ByVal pArg As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_busy_timeout CDecl Lib sqlite3 Alias "sqlite3_busy_timeout" (ByVal hDB As LongPtr, ByVal dwMilliseconds As Long) As Long
 Public Declare PtrSafe Function stub_sqlite3_cancel_auto_extension CDecl Lib sqlite3 Alias "sqlite3_cancel_auto_extension" (ByVal lpfnEntryPoint As LongPtr) As Long
+Public Declare PtrSafe Function stub_sqlite3_carray_bind CDecl Lib sqlite3 Alias "sqlite3_carray_bind" (ByVal hStmt As LongPtr, ByVal i As Long, ByVal paData As LongPtr, ByVal nData As Long, ByVal Flags As Long, ByVal lpfnDestroy As LongPtr) As Long
+Public Declare PtrSafe Function stub_sqlite3_carray_bind_v2 CDecl Lib sqlite3 Alias "sqlite3_carray_bind_v2" (ByVal hStmt As LongPtr, ByVal i As Long, ByVal paData As LongPtr, ByVal nData As Long, ByVal Flags As Long, ByVal lpfnDestroy As LongPtr, ByVal lpDestroy As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_changes CDecl Lib sqlite3 Alias "sqlite3_changes" (ByVal hDB As LongPtr) As Long
 Public Declare PtrSafe Function stub_sqlite3_changes64 CDecl Lib sqlite3 Alias "sqlite3_changes64" (ByVal hDB As LongPtr) As Currency
 Public Declare PtrSafe Function stub_sqlite3_clear_bindings CDecl Lib sqlite3 Alias "sqlite3_clear_bindings" (ByVal hStmt As LongPtr) As Long
@@ -331,6 +333,8 @@ Private Declare Function sqlite3_blob_write Lib "sqlite3win32.dll" (ByVal pBlob 
 Private Declare Function sqlite3_busy_handler Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal lpfnBusy As Long, ByVal pArg As Long) As Long
 Private Declare Function sqlite3_busy_timeout Lib "sqlite3win32.dll" (ByVal hDB As Long, ByVal dwMilliseconds As Long) As Long
 Private Declare Function sqlite3_cancel_auto_extension Lib "sqlite3win32.dll" (ByVal lpfnEntryPoint As Long) As Long
+Private Declare Function sqlite3_carray_bind Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal i As Long, ByVal paData As Long, ByVal nData As Long, ByVal Flags As Long, ByVal lpfnDestroy As Long) As Long
+Private Declare Function sqlite3_carray_bind_v2 Lib "sqlite3win32.dll" (ByVal hStmt As Long, ByVal i As Long, ByVal paData As Long, ByVal nData As Long, ByVal Flags As Long, ByVal lpfnDestroy As Long, ByVal lpDestroy As Long) As Long
 Private Declare Function sqlite3_changes Lib "sqlite3win32.dll" (ByVal hDB As Long) As Long
 Private Declare Function sqlite3_changes64 Lib "sqlite3win32.dll" (ByVal hDB As Long) As Currency
 Private Declare Function sqlite3_clear_bindings Lib "sqlite3win32.dll" (ByVal hStmt As Long) As Long
@@ -702,6 +706,14 @@ End Function
 
 Public Function stub_sqlite3_cancel_auto_extension(ByVal lpfnEntryPoint As Long) As Long
 stub_sqlite3_cancel_auto_extension = sqlite3_cancel_auto_extension(lpfnEntryPoint)
+End Function
+
+Public Function stub_sqlite3_carray_bind(ByVal hStmt As Long, ByVal i As Long, ByVal paData As Long, ByVal nData As Long, ByVal Flags As Long, ByVal lpfnDestroy As Long) As Long
+stub_sqlite3_carray_bind = sqlite3_carray_bind(hStmt, i, paData, nData, Flags, lpfnDestroy)
+End Function
+
+Public Function stub_sqlite3_carray_bind_v2(ByVal hStmt As Long, ByVal i As Long, ByVal paData As Long, ByVal nData As Long, ByVal Flags As Long, ByVal lpfnDestroy As Long, ByVal lpDestroy As Long) As Long
+stub_sqlite3_carray_bind_v2 = sqlite3_carray_bind_v2(hStmt, i, paData, nData, Flags, lpfnDestroy, lpDestroy)
 End Function
 
 Public Function stub_sqlite3_changes(ByVal hDB As Long) As Long
