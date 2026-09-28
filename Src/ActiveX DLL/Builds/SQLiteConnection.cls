@@ -96,7 +96,7 @@ If PropHandle <> NULL_PTR Then
 End If
 Dim FileNameUTF8() As Byte, Flags As Long, Result As Long
 FileNameUTF8() = UTF16_To_UTF8(FileName & vbNullChar)
-Flags = SQLITE_OPEN_FULLMUTEX
+Flags = SQLITE_OPEN_URI Or SQLITE_OPEN_FULLMUTEX
 Select Case Mode
     Case SQLiteReadOnly
         Flags = Flags Or SQLITE_OPEN_READONLY
