@@ -17,11 +17,17 @@ Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByR
 Private Declare PtrSafe Function lstrlen Lib "kernel32" Alias "lstrlenW" (ByVal lpString As LongPtr) As Long
 Private Declare PtrSafe Function lstrlenA Lib "kernel32" (ByVal lpString As LongPtr) As Long
 Private Declare PtrSafe Function MultiByteToWideChar Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long) As Long
+Private Declare PtrSafe Function HeapSize Lib "kernel32" (ByVal hHeap As LongPtr, ByVal dwFlags As Long, ByVal lpMem As LongPtr) As LongPtr
+Private Declare PtrSafe Function HeapFree Lib "kernel32" (ByVal hHeap As LongPtr, ByVal dwFlags As Long, ByVal lpMem As LongPtr) As Long
+Private Declare PtrSafe Function GetProcessHeap Lib "kernel32" () As LongPtr
 #Else
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare Function lstrlen Lib "kernel32" Alias "lstrlenW" (ByVal lpString As Long) As Long
 Private Declare Function lstrlenA Lib "kernel32" (ByVal lpString As Long) As Long
 Private Declare Function MultiByteToWideChar Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpMultiByteStr As Long, ByVal cbMultiByte As Long, ByVal lpWideCharStr As Long, ByVal cchWideChar As Long) As Long
+Private Declare Function HeapSize Lib "kernel32" (ByVal hHeap As Long, ByVal dwFlags As Long, ByVal lpMem As Long) As Long
+Private Declare Function HeapFree Lib "kernel32" (ByVal hHeap As Long, ByVal dwFlags As Long, ByVal lpMem As Long) As Long
+Private Declare Function GetProcessHeap Lib "kernel32" () As Long
 #End If
 Private Const CP_UTF8 As Long = 65001
 Private Const JULIANDAY_OFFSET As Double = 2415018.5
@@ -526,3 +532,39 @@ If Ptr <> NULL_PTR Then
     End If
 End If
 End Function
+
+#If VBA7 Then
+Public Function SQLiteCArrayTypePtr() As LongPtr
+#Else
+Public Function SQLiteCArrayTypePtr() As Long
+#End If
+Static STR_CARRAY_UTF8 As Currency
+STR_CARRAY_UTF8 = 13345943888.7267@
+SQLiteCArrayTypePtr = VarPtr(STR_CARRAY_UTF8)
+End Function
+
+#If VBA7 Then
+Public Sub SQLiteCArrayDestroy CDecl(ByVal lpMem As LongPtr)
+#Else
+Public Sub SQLiteCArrayDestroy(ByVal lpMem As Long)
+#End If
+If lpMem <> NULL_PTR Then HeapFree GetProcessHeap(), 0, lpMem
+End Sub
+
+#If VBA7 Then
+Public Sub SQLiteCArrayDestroyText CDecl(ByVal lpMem As LongPtr)
+#Else
+Public Sub SQLiteCArrayDestroyText(ByVal lpMem As Long)
+#End If
+If lpMem <> NULL_PTR Then
+    Dim hHeap As LongPtr
+    hHeap = GetProcessHeap()
+    Dim nData As LongPtr, i As LongPtr, Ptr As LongPtr
+    nData = HeapSize(hHeap, 0, lpMem) \ PTR_SIZE
+    For i = 0 To (nData - 1)
+        CopyMemory Ptr, ByVal UnsignedAdd(lpMem, i * PTR_SIZE), PTR_SIZE
+        If Ptr <> NULL_PTR Then HeapFree hHeap, 0, Ptr
+    Next i
+    HeapFree hHeap, 0, lpMem
+End If
+End Sub
