@@ -484,6 +484,8 @@ Public Const SQLITE_SCANSTAT_EST As Long = 2
 Public Const SQLITE_SCANSTAT_NAME As Long = 3
 Public Const SQLITE_SCANSTAT_EXPLAIN As Long = 4
 Public Const SQLITE_SCANSTAT_SELECTID As Long = 5
+Public Const SQLITE_SCANSTAT_PARENTID As Long = 6
+Public Const SQLITE_SCANSTAT_NCYCLE As Long = 7
 
 ' Serialize Flags
 Public Const SQLITE_SERIALIZE_NOCOPY As Long = &H1
@@ -492,6 +494,13 @@ Public Const SQLITE_SERIALIZE_NOCOPY As Long = &H1
 Public Const SQLITE_DESERIALIZE_FREEONCLOSE As Long = 1
 Public Const SQLITE_DESERIALIZE_RESIZEABLE As Long = 2
 Public Const SQLITE_DESERIALIZE_READONLY As Long = 4
+
+' CARRAY Table-Valued Function Flags
+Public Const SQLITE_CARRAY_INT32 As Long = 0
+Public Const SQLITE_CARRAY_INT64 As Long = 1
+Public Const SQLITE_CARRAY_DOUBLE As Long = 2
+Public Const SQLITE_CARRAY_TEXT As Long = 3
+Public Const SQLITE_CARRAY_BLOB As Long = 4
 
 ' Win32 Directory Types
 Public Const SQLITE_WIN32_DATA_DIRECTORY_TYPE As Long = 1
