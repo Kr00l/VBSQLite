@@ -187,7 +187,7 @@ Select Case VT
         If (VT And VT_BYREF) = VT_BYREF Then CopyMemory pArray, ByVal pArray, PTR_SIZE
         If pArray <> NULL_PTR Then CopyMemory pvData, ByVal UnsignedAdd(pArray, 12), PTR_SIZE
         If pvData <> NULL_PTR Then
-            Result = stub_sqlite3_bind_blob(PropHandle, Index, pvData, LenB(Value), SQLITE_TRANSIENT)
+            Result = stub_sqlite3_bind_blob(PropHandle, Index, pvData, (UBound(Value) - LBound(Value)) + 1, SQLITE_TRANSIENT)
         Else
             Result = stub_sqlite3_bind_null(PropHandle, Index)
         End If
@@ -208,7 +208,7 @@ Public Sub SetParameterValueCArray(ByVal Index As Long, ByRef Value As Variant, 
 Attribute SetParameterValueCArray.VB_Description = "Binds a parameter value of type carray to the SQL query."
 Dim Result As Long
 If IsArray(Value) Then
-    Dim LBoundValue As Long, UBoundValue As Long, LBoundValueDim2 As Long, LBoundValueDim3 As Long
+    Dim LBoundValue As Long, UBoundValue As Long
     UBoundValue = -1
     Dim pArray As LongPtr
     CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value), 8), PTR_SIZE
@@ -218,24 +218,18 @@ If IsArray(Value) Then
     If pArray <> NULL_PTR Then
         Dim DimensionCount As Integer
         CopyMemory DimensionCount, ByVal pArray, 2
-        If DimensionCount >= 1 Then
-            If DimensionCount <= 3 Then
-                LBoundValue = LBound(Value)
-                UBoundValue = UBound(Value)
-                If DimensionCount >= 2 Then LBoundValueDim2 = LBound(Value, 2)
-                If DimensionCount >= 3 Then LBoundValueDim3 = LBound(Value, 3)
-            Else
-                Err.Raise Number:=5, Description:="Array has too many dimensions"
-            End If
+        If DimensionCount = 1 Then
+            LBoundValue = LBound(Value)
+            UBoundValue = UBound(Value)
         Else
-            Err.Raise Number:=5, Description:="Array must be at least single dimensioned"
+            Err.Raise Number:=5, Description:="Array must be single dimensioned"
         End If
     End If
-    Dim lpMem As LongPtr, nData As Long
+    Dim lpMem As LongPtr, pvData As LongPtr
     If (UBoundValue - LBoundValue) > -1 Then
         Dim hHeap As LongPtr
         hHeap = GetProcessHeap()
-        Dim pvData As LongPtr, Flags As Long, i As Long
+        Dim Flags As Long, i As Long
         Select Case VarType(Value)
             Case (vbArray + vbLong), (vbArray + vbInteger), (vbArray + vbByte)
                 If VarType(Value) = (vbArray + vbLong) Then
@@ -243,14 +237,7 @@ If IsArray(Value) Then
                 Else
                     Dim ArrInt32() As Long
                     ReDim ArrInt32(LBoundValue To UBoundValue) As Long
-                    Select Case DimensionCount
-                        Case 1
-                            For i = LBoundValue To UBoundValue: ArrInt32(i) = Value(i): Next i
-                        Case 2
-                            For i = LBoundValue To UBoundValue: ArrInt32(i) = Value(i, LBoundValueDim2): Next i
-                        Case 3
-                            For i = LBoundValue To UBoundValue: ArrInt32(i) = Value(i, LBoundValueDim2, LBoundValueDim3): Next i
-                    End Select
+                    For i = LBoundValue To UBoundValue: ArrInt32(i) = Value(i): Next i
                     pvData = VarPtr(ArrInt32(LBoundValue))
                 End If
                 Flags = SQLITE_CARRAY_INT32
@@ -262,29 +249,11 @@ If IsArray(Value) Then
                     ReDim ArrInt64(LBoundValue To UBoundValue) As Currency
                     Select Case VarType(Value)
                         Case (vbArray + vbDecimal)
-                            Select Case DimensionCount
-                                Case 1
-                                    For i = LBoundValue To UBoundValue
-                                        If VarI8FromDec(Value(i), ArrInt64(i)) = DISP_E_OVERFLOW Then Err.Raise 6
-                                    Next i
-                                Case 2
-                                    For i = LBoundValue To UBoundValue
-                                        If VarI8FromDec(Value(i, LBoundValueDim2), ArrInt64(i)) = DISP_E_OVERFLOW Then Err.Raise 6
-                                    Next i
-                                Case 3
-                                    For i = LBoundValue To UBoundValue
-                                        If VarI8FromDec(Value(i, LBoundValueDim2, LBoundValueDim3), ArrInt64(i)) = DISP_E_OVERFLOW Then Err.Raise 6
-                                    Next i
-                            End Select
+                            For i = LBoundValue To UBoundValue
+                                If VarI8FromDec(Value(i), ArrInt64(i)) = DISP_E_OVERFLOW Then Err.Raise 6
+                            Next i
                         Case (vbArray + vbCurrency)
-                            Select Case DimensionCount
-                                Case 1
-                                    For i = LBoundValue To UBoundValue: ArrInt64(i) = Value(i) / 10000@: Next i
-                                Case 2
-                                    For i = LBoundValue To UBoundValue: ArrInt64(i) = Value(i, LBoundValueDim2) / 10000@: Next i
-                                Case 3
-                                    For i = LBoundValue To UBoundValue: ArrInt64(i) = Value(i, LBoundValueDim2, LBoundValueDim3) / 10000@: Next i
-                            End Select
+                            For i = LBoundValue To UBoundValue: ArrInt64(i) = Value(i) / 10000@: Next i
                     End Select
                     pvData = VarPtr(ArrInt64(LBoundValue))
                 End If
@@ -295,46 +264,42 @@ If IsArray(Value) Then
             Case (vbArray + vbString)
                 Dim ArrText() As LongPtr, Ptr As LongPtr, Size As Long, lpMemText As LongPtr
                 ReDim ArrText(LBoundValue To UBoundValue) ' As LongPtr
-                Select Case DimensionCount
-                    Case 1
-                        For i = LBoundValue To UBoundValue
-                            Ptr = StrPtr(Value(i))
-                            If Ptr <> NULL_PTR Then Size = WideCharToMultiByte(CP_UTF8, 0, Ptr, -1, NULL_PTR, 0, NULL_PTR, NULL_PTR) Else Size = 0
-                            If Size > 0 Then
-                                lpMemText = HeapAlloc(hHeap, 0, Size)
-                                WideCharToMultiByte CP_UTF8, 0, Ptr, -1, lpMemText, Size, NULL_PTR, NULL_PTR
-                            Else
-                                lpMemText = HeapAlloc(hHeap, HEAP_ZERO_MEMORY, 1)
-                            End If
-                            ArrText(i) = lpMemText
-                        Next i
-                    Case 2
-                        For i = LBoundValue To UBoundValue
-                            Ptr = StrPtr(Value(i, LBoundValueDim2))
-                            If Ptr <> NULL_PTR Then Size = WideCharToMultiByte(CP_UTF8, 0, Ptr, -1, NULL_PTR, 0, NULL_PTR, NULL_PTR) Else Size = 0
-                            If Size > 0 Then
-                                lpMemText = HeapAlloc(hHeap, 0, Size)
-                                WideCharToMultiByte CP_UTF8, 0, Ptr, -1, lpMemText, Size, NULL_PTR, NULL_PTR
-                            Else
-                                lpMemText = HeapAlloc(hHeap, HEAP_ZERO_MEMORY, 1)
-                            End If
-                            ArrText(i) = lpMemText
-                        Next i
-                    Case 3
-                        For i = LBoundValue To UBoundValue
-                            Ptr = StrPtr(Value(i, LBoundValueDim2, LBoundValueDim3))
-                            If Ptr <> NULL_PTR Then Size = WideCharToMultiByte(CP_UTF8, 0, Ptr, -1, NULL_PTR, 0, NULL_PTR, NULL_PTR) Else Size = 0
-                            If Size > 0 Then
-                                lpMemText = HeapAlloc(hHeap, 0, Size)
-                                WideCharToMultiByte CP_UTF8, 0, Ptr, -1, lpMemText, Size, NULL_PTR, NULL_PTR
-                            Else
-                                lpMemText = HeapAlloc(hHeap, HEAP_ZERO_MEMORY, 1)
-                            End If
-                            ArrText(i) = lpMemText
-                        Next i
-                End Select
+                For i = LBoundValue To UBoundValue
+                    Ptr = StrPtr(Value(i))
+                    If Ptr <> NULL_PTR Then Size = WideCharToMultiByte(CP_UTF8, 0, Ptr, -1, NULL_PTR, 0, NULL_PTR, NULL_PTR) Else Size = 0
+                    If Size > 0 Then
+                        lpMemText = HeapAlloc(hHeap, 0, Size)
+                        WideCharToMultiByte CP_UTF8, 0, Ptr, -1, lpMemText, Size, NULL_PTR, NULL_PTR
+                    Else
+                        lpMemText = HeapAlloc(hHeap, HEAP_ZERO_MEMORY, 1)
+                    End If
+                    ArrText(i) = lpMemText
+                Next i
                 pvData = VarPtr(ArrText(LBoundValue))
                 Flags = SQLITE_CARRAY_TEXT
+            Case (vbArray + vbVariant)
+                For i = LBoundValue To UBoundValue
+                    If VarType(Value(i)) <> (vbArray + vbByte) Then Err.Raise 13
+                Next i
+                Dim ArrBlob() As LongPtr, pBlob As LongPtr, cBytes As Long, lpMemBlob As LongPtr
+                ReDim ArrBlob(LBoundValue To (LBoundValue + (((((UBoundValue - LBoundValue) + 1) * 2) - 1)))) ' As LongPtr
+                For i = LBoundValue To UBoundValue
+                    CopyMemory pArray, ByVal UnsignedAdd(VarPtr(Value(i)), 8), PTR_SIZE
+                    If pArray <> NULL_PTR Then ' Never VT_BYREF
+                        CopyMemory pBlob, ByVal UnsignedAdd(pArray, 12), PTR_SIZE
+                        If pBlob <> NULL_PTR Then
+                            cBytes = (UBound(Value(i)) - LBound(Value(i))) + 1
+                            If cBytes > 0 Then
+                                lpMemBlob = HeapAlloc(hHeap, 0, cBytes)
+                                If lpMemBlob <> NULL_PTR Then CopyMemory ByVal lpMemBlob, ByVal pBlob, cBytes
+                                ArrBlob((LBoundValue + ((i - LBoundValue) * 2))) = lpMemBlob
+                                ArrBlob((LBoundValue + ((i - LBoundValue) * 2)) + 1) = cBytes
+                            End If
+                        End If
+                    End If
+                Next i
+                pvData = VarPtr(ArrBlob(LBoundValue))
+                Flags = SQLITE_CARRAY_BLOB
             Case Else
                 Err.Raise 13
         End Select
@@ -345,8 +310,8 @@ If IsArray(Value) Then
         PropPosition = 0
     End If
     If pvData <> NULL_PTR Then
+        Dim nData As Long, Length As Long
         nData = (UBoundValue - LBoundValue) + 1
-        Dim Length As Long
         Select Case Flags
             Case SQLITE_CARRAY_INT32
                 Length = nData * 4
@@ -354,6 +319,8 @@ If IsArray(Value) Then
                 Length = nData * 8
             Case SQLITE_CARRAY_TEXT
                 Length = nData * PTR_SIZE
+            Case SQLITE_CARRAY_BLOB
+                Length = nData * (2 * PTR_SIZE)
         End Select
         If Length > 0 Then
             lpMem = HeapAlloc(hHeap, 0, Length)
@@ -362,11 +329,14 @@ If IsArray(Value) Then
     End If
     If lpMem <> NULL_PTR Then
         Dim lpfnDestroy As LongPtr
-        If Flags <> SQLITE_CARRAY_TEXT Then
-            lpfnDestroy = ProcPtr(AddressOf SQLiteCArrayDestroy)
-        Else
-            lpfnDestroy = ProcPtr(AddressOf SQLiteCArrayDestroyText)
-        End If
+        Select Case Flags
+            Case SQLITE_CARRAY_INT32, SQLITE_CARRAY_INT64, SQLITE_CARRAY_DOUBLE
+                lpfnDestroy = ProcPtr(AddressOf SQLiteCArrayDestroy)
+            Case SQLITE_CARRAY_TEXT
+                lpfnDestroy = ProcPtr(AddressOf SQLiteCArrayDestroyText)
+            Case SQLITE_CARRAY_BLOB
+                lpfnDestroy = ProcPtr(AddressOf SQLiteCArrayDestroyBlob)
+        End Select
         If LegacySyntax = False Then
             Result = stub_sqlite3_carray_bind_v2(PropHandle, Index, lpMem, nData, Flags, lpfnDestroy, lpMem)
         Else

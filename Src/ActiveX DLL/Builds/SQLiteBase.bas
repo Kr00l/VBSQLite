@@ -568,3 +568,21 @@ If lpMem <> NULL_PTR Then
     HeapFree hHeap, 0, lpMem
 End If
 End Sub
+
+#If VBA7 Then
+Public Sub SQLiteCArrayDestroyBlob CDecl(ByVal lpMem As LongPtr)
+#Else
+Public Sub SQLiteCArrayDestroyBlob(ByVal lpMem As Long)
+#End If
+If lpMem <> NULL_PTR Then
+    Dim hHeap As LongPtr
+    hHeap = GetProcessHeap()
+    Dim nData As LongPtr, i As LongPtr, Ptr As LongPtr
+    nData = HeapSize(hHeap, 0, lpMem) \ (2 * PTR_SIZE)
+    For i = 0 To (nData - 1)
+        CopyMemory Ptr, ByVal UnsignedAdd(lpMem, i * (2 * PTR_SIZE)), PTR_SIZE
+        If Ptr <> NULL_PTR Then HeapFree hHeap, 0, Ptr
+    Next i
+    HeapFree hHeap, 0, lpMem
+End If
+End Sub
