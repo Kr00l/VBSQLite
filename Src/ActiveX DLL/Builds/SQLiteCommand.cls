@@ -247,12 +247,10 @@ If IsArray(Value) Then
                         CopyMemory pBlob, ByVal UnsignedAdd(pArray, 12), PTR_SIZE
                         If pBlob <> NULL_PTR Then
                             cBytes = (UBound(Value(i)) - LBound(Value(i))) + 1
-                            If cBytes > 0 Then
-                                lpMemBlob = HeapAlloc(hHeap, 0, cBytes)
-                                If lpMemBlob <> NULL_PTR Then CopyMemory ByVal lpMemBlob, ByVal pBlob, cBytes
-                                ArrBlob((LBoundValue + ((i - LBoundValue) * 2))) = lpMemBlob
-                                ArrBlob((LBoundValue + ((i - LBoundValue) * 2)) + 1) = cBytes
-                            End If
+                            lpMemBlob = HeapAlloc(hHeap, 0, cBytes)
+                            If cBytes > 0 And lpMemBlob <> NULL_PTR Then CopyMemory ByVal lpMemBlob, ByVal pBlob, cBytes
+                            ArrBlob((LBoundValue + ((i - LBoundValue) * 2))) = lpMemBlob
+                            ArrBlob((LBoundValue + ((i - LBoundValue) * 2)) + 1) = cBytes
                         End If
                     End If
                 Next i

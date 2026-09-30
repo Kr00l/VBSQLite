@@ -17,7 +17,6 @@ Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByR
 Private Declare PtrSafe Function lstrlen Lib "kernel32" Alias "lstrlenW" (ByVal lpString As LongPtr) As Long
 Private Declare PtrSafe Function lstrlenA Lib "kernel32" (ByVal lpString As LongPtr) As Long
 Private Declare PtrSafe Function MultiByteToWideChar Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long) As Long
-Private Declare PtrSafe Function EmptyByteArray Lib "oleaut32" Alias "SafeArrayCreateVector" (Optional ByVal VT As Long = vbByte, Optional ByVal Lower As Long = 0, Optional ByVal Count As Long = 0) As Byte()
 Private Declare PtrSafe Function HeapSize Lib "kernel32" (ByVal hHeap As LongPtr, ByVal dwFlags As Long, ByVal lpMem As LongPtr) As LongPtr
 Private Declare PtrSafe Function HeapFree Lib "kernel32" (ByVal hHeap As LongPtr, ByVal dwFlags As Long, ByVal lpMem As LongPtr) As Long
 Private Declare PtrSafe Function GetProcessHeap Lib "kernel32" () As LongPtr
@@ -26,7 +25,6 @@ Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Desti
 Private Declare Function lstrlen Lib "kernel32" Alias "lstrlenW" (ByVal lpString As Long) As Long
 Private Declare Function lstrlenA Lib "kernel32" (ByVal lpString As Long) As Long
 Private Declare Function MultiByteToWideChar Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpMultiByteStr As Long, ByVal cbMultiByte As Long, ByVal lpWideCharStr As Long, ByVal cchWideChar As Long) As Long
-Private Declare Function EmptyByteArray Lib "oleaut32" Alias "SafeArrayCreateVector" (Optional ByVal VT As Long = vbByte, Optional ByVal Lower As Long = 0, Optional ByVal Count As Long = 0) As Byte()
 Private Declare Function HeapSize Lib "kernel32" (ByVal hHeap As Long, ByVal dwFlags As Long, ByVal lpMem As Long) As Long
 Private Declare Function HeapFree Lib "kernel32" (ByVal hHeap As Long, ByVal dwFlags As Long, ByVal lpMem As Long) As Long
 Private Declare Function GetProcessHeap Lib "kernel32" () As Long
@@ -493,14 +491,14 @@ Public Function SQLiteBlobToByteArray(ByVal Ptr As LongPtr, ByVal Size As Long) 
 #Else
 Public Function SQLiteBlobToByteArray(ByVal Ptr As Long, ByVal Size As Long) As Variant
 #End If
+Dim B() As Byte
 If Ptr <> NULL_PTR And Size > 0 Then
-    Dim B() As Byte
     ReDim B(0 To (Size - 1)) As Byte
     CopyMemory B(0), ByVal Ptr, Size
-    SQLiteBlobToByteArray = B()
 Else
-    SQLiteBlobToByteArray = EmptyByteArray()
+    B() = vbNullString
 End If
+SQLiteBlobToByteArray = B()
 End Function
 
 #If VBA7 Then
