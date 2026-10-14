@@ -38,16 +38,80 @@ Private Const MEM_RELEASE As Long = &H8000&
 Private Const PAGE_EXECUTE_READWRITE As Long = &H40
 Private SQLiteRefCount As Long
 
+#If VBSQLITE_DYN Then
+
+#If VBA7 Then
+Private Declare PtrSafe Function GetModuleHandleEx Lib "kernel32" Alias "GetModuleHandleExW" (ByVal dwFlags As Long, ByVal lpModuleName As LongPtr, ByRef phModule As LongPtr) As LongPtr
+Private Declare PtrSafe Function GetModuleFileName Lib "kernel32" Alias "GetModuleFileNameW" (ByVal hModule As LongPtr, ByVal lpFileName As LongPtr, ByVal nSize As Long) As Long
+Private Declare PtrSafe Function LoadLibraryEx Lib "kernel32" Alias "LoadLibraryExW" (ByVal lpLibFileName As LongPtr, ByVal hFile As LongPtr, ByVal dwFlags As Long) As LongPtr
+Private Declare PtrSafe Function FreeLibrary Lib "kernel32" (ByVal hLibModule As LongPtr) As Long
+#Else
+Private Declare Function GetModuleHandleEx Lib "kernel32" Alias "GetModuleHandleExW" (ByVal dwFlags As Long, ByVal lpModuleName As Long, ByRef phModule As Long) As Long
+Private Declare Function GetModuleFileName Lib "kernel32" Alias "GetModuleFileNameW" (ByVal hModule As Long, ByVal lpFileName As Long, ByVal nSize As Long) As Long
+Private Declare Function LoadLibraryEx Lib "kernel32" Alias "LoadLibraryExW" (ByVal lpLibFileName As Long, ByVal hFile As Long, ByVal dwFlags As Long) As Long
+Private Declare Function FreeLibrary Lib "kernel32" (ByVal hLibModule As Long) As Long
+#End If
+Private Const GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS As Long = &H4, GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT As Long = &H2
+Private Const MAX_PATH As Long = 260, MAX_PATH_W As Long = 32767
+Private Const LOAD_WITH_ALTERED_SEARCH_PATH As Long = &H8
+Private SQLiteLibrary As LongPtr
+
+Public Sub SQLiteModuleMarker()
+End Sub
+
+#End If
+
 Public Sub SQLiteAddRef()
 ' It is recommended that applications always invoke sqlite3_initialize() directly prior to using any other functions.
 ' Future releases of SQLite may require this. In other words, the behavior exhibited when SQLite is compiled with SQLITE_OMIT_AUTOINIT might become the default behavior in some future release of SQLite.
-If SQLiteRefCount = 0 Then stub_sqlite3_initialize
+If SQLiteRefCount = 0 Then
+    
+    #If VBSQLITE_DYN Then
+    
+    Dim hModule As LongPtr
+    If GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS Or GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, AddressOf SQLiteModuleMarker, hModule) <> 0 Then
+        Dim PathName As String, Buffer As String, RetVal As Long
+        Buffer = String$(MAX_PATH, vbNullChar)
+        RetVal = GetModuleFileName(hModule, StrPtr(Buffer), MAX_PATH)
+        If RetVal = MAX_PATH Then ' Path > MAX_PATH
+            Buffer = String$(MAX_PATH_W, vbNullChar)
+            RetVal = GetModuleFileName(hModule, StrPtr(Buffer), MAX_PATH_W)
+        End If
+        If RetVal > 0 Then
+            Buffer = Left$(Buffer, RetVal)
+            PathName = Left$(Buffer, InStrRev(Buffer, "\"))
+        End If
+        If Not PathName = vbNullString Then
+            #If Win64 Then
+            SQLiteLibrary = LoadLibraryEx(StrPtr(PathName & "sqlite3win64.dll"), NULL_PTR, LOAD_WITH_ALTERED_SEARCH_PATH)
+            #Else
+            SQLiteLibrary = LoadLibraryEx(StrPtr(PathName & "sqlite3win32.dll"), NULL_PTR, LOAD_WITH_ALTERED_SEARCH_PATH)
+            #End If
+        End If
+    End If
+    
+    #End If
+    
+    stub_sqlite3_initialize
+End If
 SQLiteRefCount = SQLiteRefCount + 1
 End Sub
 
 Public Sub SQLiteRelease()
 SQLiteRefCount = SQLiteRefCount - 1
-If SQLiteRefCount = 0 Then stub_sqlite3_shutdown
+If SQLiteRefCount = 0 Then
+    stub_sqlite3_shutdown
+    
+    #If VBSQLITE_DYN Then
+    
+    If SQLiteLibrary <> NULL_PTR Then
+        FreeLibrary SQLiteLibrary
+        SQLiteLibrary = NULL_PTR
+    End If
+    
+    #End If
+    
+End If
 End Sub
 
 #If VBA7 Then
