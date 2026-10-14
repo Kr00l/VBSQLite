@@ -12,6 +12,7 @@ Private Const PTR_SIZE As Long = 8
 Private Const NULL_PTR As Long = 0
 Private Const PTR_SIZE As Long = 4
 #End If
+#Const VBSQLITE_OBJ = (TWINBASIC <> 0 And VBSQLITE_DYN = 0)
 #If VBA7 Then
 Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare PtrSafe Function lstrlen Lib "kernel32" Alias "lstrlenW" (ByVal lpString As LongPtr) As Long
@@ -70,7 +71,11 @@ End If
 End Sub
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Function SQLiteFunctionLowerUpper CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionLowerUpper(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#End If
 #Else
 Public Function SQLiteFunctionLowerUpper(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
 #End If
@@ -93,7 +98,11 @@ End If
 End Function
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Function SQLiteFunctionLike CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionLike(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#End If
 #Else
 Public Function SQLiteFunctionLike(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
 #End If
@@ -116,7 +125,11 @@ End If
 End Function
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Function SQLiteFunctionNoCaseCollating CDecl(ByVal pNotUsed As LongPtr, ByVal nKey1 As Long, ByVal pKey1 As LongPtr, ByVal nKey2 As Long, ByVal pKey2 As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionNoCaseCollating(ByVal pNotUsed As LongPtr, ByVal nKey1 As Long, ByVal pKey1 As LongPtr, ByVal nKey2 As Long, ByVal pKey2 As LongPtr) As Long
+#End If
 #Else
 Public Function SQLiteFunctionNoCaseCollating(ByVal pNotUsed As Long, ByVal nKey1 As Long, ByVal pKey1 As Long, ByVal nKey2 As Long, ByVal pKey2 As Long) As Long
 #End If
@@ -145,7 +158,11 @@ End If
 End Sub
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Function SQLiteFunctionOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionOADate(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#End If
 #Else
 Public Function SQLiteFunctionOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
 #End If
@@ -358,7 +375,11 @@ End If
 End Function
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Function SQLiteFunctionJulianDayFromOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionJulianDayFromOADate(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#End If
 #Else
 Public Function SQLiteFunctionJulianDayFromOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
 #End If
@@ -387,7 +408,11 @@ End If
 End Function
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Function SQLiteFunctionJulianDayToOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionJulianDayToOADate(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#End If
 #Else
 Public Function SQLiteFunctionJulianDayToOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
 #End If
@@ -417,7 +442,11 @@ End If
 End Function
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Function SQLiteFunctionUnixEpochFromOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionUnixEpochFromOADate(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#End If
 #Else
 Public Function SQLiteFunctionUnixEpochFromOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
 #End If
@@ -446,7 +475,11 @@ End If
 End Function
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Function SQLiteFunctionUnixEpochToOADate CDecl(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#Else
+Public Function SQLiteFunctionUnixEpochToOADate(ByVal pCtx As LongPtr, ByVal cArg As Long, ByVal pArgValue As LongPtr) As Long
+#End If
 #Else
 Public Function SQLiteFunctionUnixEpochToOADate(ByVal pCtx As Long, ByVal cArg As Long, ByVal pArgValue As Long) As Long
 #End If
@@ -477,7 +510,11 @@ End If
 End Function
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Function SQLiteProgressHandlerCallback CDecl(ByVal pArg As ISQLiteProgressHandler) As Long
+#Else
+Public Function SQLiteProgressHandlerCallback(ByVal pArg As ISQLiteProgressHandler) As Long
+#End If
 #Else
 Public Function SQLiteProgressHandlerCallback(ByVal pArg As ISQLiteProgressHandler) As Long
 #End If
@@ -544,7 +581,11 @@ SQLiteCArrayTypePtr = VarPtr(STR_CARRAY_UTF8)
 End Function
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Sub SQLiteCArrayDestroy CDecl(ByVal lpMem As LongPtr)
+#Else
+Public Sub SQLiteCArrayDestroy(ByVal lpMem As LongPtr)
+#End If
 #Else
 Public Sub SQLiteCArrayDestroy(ByVal lpMem As Long)
 #End If
@@ -552,7 +593,11 @@ If lpMem <> NULL_PTR Then HeapFree GetProcessHeap(), 0, lpMem
 End Sub
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Sub SQLiteCArrayDestroyText CDecl(ByVal lpMem As LongPtr)
+#Else
+Public Sub SQLiteCArrayDestroyText(ByVal lpMem As LongPtr)
+#End If
 #Else
 Public Sub SQLiteCArrayDestroyText(ByVal lpMem As Long)
 #End If
@@ -570,7 +615,11 @@ End If
 End Sub
 
 #If VBA7 Then
+#If VBSQLITE_OBJ Then
 Public Sub SQLiteCArrayDestroyBlob CDecl(ByVal lpMem As LongPtr)
+#Else
+Public Sub SQLiteCArrayDestroyBlob(ByVal lpMem As LongPtr)
+#End If
 #Else
 Public Sub SQLiteCArrayDestroyBlob(ByVal lpMem As Long)
 #End If
