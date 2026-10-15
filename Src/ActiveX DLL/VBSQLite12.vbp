@@ -1,5 +1,5 @@
 Type=OleDll
-Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#C:\Windows\SysWOW64\stdole2.tlb#OLE Automation
+Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\..\..\WINDOWS\system32\stdole2.tlb#OLE Automation
 Module=Common; Common\Common.bas
 Module=sqlite3win32stubs; sqlite3win32stubs.bas
 Module=sqlite3win32helper; sqlite3win32helper.bas
@@ -25,7 +25,7 @@ CompatibleMode="0"
 CompatibleEXE32="Bin\VBSQLite12.DLL"
 MajorVer=1
 MinorVer=2
-RevisionVer=57
+RevisionVer=58
 AutoIncrementVer=0
 ServerSupportFiles=0
 CompilationType=0
