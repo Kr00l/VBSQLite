@@ -28,7 +28,7 @@ MinorVer=2
 RevisionVer=58
 AutoIncrementVer=0
 ServerSupportFiles=0
-CondComp="VBSQLITE_EXT = -1"
+CondComp="VBSQLITE_DYN = -1"
 CompilationType=0
 OptimizationType=0
 FavorPentiumPro(tm)=0

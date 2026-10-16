@@ -12,7 +12,7 @@ Private Const PTR_SIZE As Long = 8
 Private Const NULL_PTR As Long = 0
 Private Const PTR_SIZE As Long = 4
 #End If
-#Const VBSQLITE_OBJ = (TWINBASIC <> 0 And VBSQLITE_EXT = 0)
+#Const VBSQLITE_OBJ = (TWINBASIC <> 0 And VBSQLITE_DYN = 0)
 #If VBA7 Then
 #If VBSQLITE_OBJ Then
 Public Declare PtrSafe Function stub_sqlite3_aggregate_context CDecl Lib sqlite3 Alias "sqlite3_aggregate_context" (ByVal pCtx As LongPtr, ByVal nBytes As Long) As LongPtr
