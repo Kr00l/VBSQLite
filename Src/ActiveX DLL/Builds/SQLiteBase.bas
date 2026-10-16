@@ -12,7 +12,7 @@ Private Const PTR_SIZE As Long = 8
 Private Const NULL_PTR As Long = 0
 Private Const PTR_SIZE As Long = 4
 #End If
-#Const VBSQLITE_OBJ = (TWINBASIC <> 0 And VBSQLITE_EXT = 0)
+#Const VBSQLITE_OBJ = (TWINBASIC <> 0 And VBSQLITE_DYN = 0)
 #If VBA7 Then
 Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
 Private Declare PtrSafe Function lstrlen Lib "kernel32" Alias "lstrlenW" (ByVal lpString As LongPtr) As Long
@@ -38,7 +38,7 @@ Private Const MEM_RELEASE As Long = &H8000&
 Private Const PAGE_EXECUTE_READWRITE As Long = &H40
 Private SQLiteRefCount As Long
 
-#If VBSQLITE_EXT Then
+#If VBSQLITE_DYN Then
 
 #If VBA7 Then
 Private Declare PtrSafe Function GetModuleHandleEx Lib "kernel32" Alias "GetModuleHandleExW" (ByVal dwFlags As Long, ByVal lpModuleName As LongPtr, ByRef phModule As LongPtr) As LongPtr
@@ -66,7 +66,7 @@ Public Sub SQLiteAddRef()
 ' Future releases of SQLite may require this. In other words, the behavior exhibited when SQLite is compiled with SQLITE_OMIT_AUTOINIT might become the default behavior in some future release of SQLite.
 If SQLiteRefCount = 0 Then
     
-    #If VBSQLITE_EXT Then
+    #If VBSQLITE_DYN Then
     
     If SQLiteLibrary = NULL_PTR Then
         Dim hModule As LongPtr
@@ -104,7 +104,7 @@ SQLiteRefCount = SQLiteRefCount - 1
 If SQLiteRefCount = 0 Then
     stub_sqlite3_shutdown
     
-    #If VBSQLITE_EXT Then
+    #If VBSQLITE_DYN Then
     
     If SQLiteLibrary <> NULL_PTR Then
         FreeLibrary SQLiteLibrary
