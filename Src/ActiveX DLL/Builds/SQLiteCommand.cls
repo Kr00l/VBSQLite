@@ -25,7 +25,7 @@ Private Const NULL_PTR As Long = 0
 Private Const PTR_SIZE As Long = 4
 #End If
 #If VBA7 Then
-Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As LongPtr)
 Private Declare PtrSafe Function VarI8FromDec Lib "oleaut32" (ByRef pDecIn As Variant, ByRef i64Out As Currency) As Long
 Private Declare PtrSafe Function HeapAlloc Lib "kernel32" (ByVal hHeap As LongPtr, ByVal dwFlags As Long, ByVal dwBytes As LongPtr) As LongPtr
 Private Declare PtrSafe Function GetProcessHeap Lib "kernel32" () As LongPtr

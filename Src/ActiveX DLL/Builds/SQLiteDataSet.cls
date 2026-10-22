@@ -32,7 +32,7 @@ Private Type TRECORDS
 Rows() As TCOLS
 End Type
 #If VBA7 Then
-Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As LongPtr)
 Private Declare PtrSafe Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
 #Else
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
@@ -63,7 +63,7 @@ Result = stub_sqlite3_step(hStmt)
 ArrUBound = -1
 While Result = SQLITE_ROW
     If PropRecordCount(0) > ArrUBound Then
-        ArrUBound = PropRecordCount(0) + ARR_BUMP - 1
+        ArrUBound = ArrUBound + ARR_BUMP
         ReDim Preserve PropValues.Rows(0 To ArrUBound) As TCOLS
     End If
     With PropValues.Rows(PropRecordCount(0))

@@ -33,7 +33,7 @@ SQLiteReadWrite = 1
 SQLiteReadWriteCreate = 2
 End Enum
 #If VBA7 Then
-Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As LongPtr)
 Private Declare PtrSafe Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
 Private Declare PtrSafe Function VarI8FromDec Lib "oleaut32" (ByRef pDecIn As Variant, ByRef i64Out As Currency) As Long
 Private Declare PtrSafe Function VarI8FromR8 Lib "oleaut32" (ByVal DblIn As Double, ByRef i64Out As Currency) As Long

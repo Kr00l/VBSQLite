@@ -25,8 +25,14 @@ Private Const NULL_PTR As Long = 0
 Private Const PTR_SIZE As Long = 4
 #End If
 Private Const ARR_BUMP As Long = 10
+#If Win64 Then
+Private Const ARR_DOUBLING_STEPS As Long = 14
+#Else
+Private Const ARR_DOUBLING_STEPS As Long = 12
+#End If
+Private Const ARR_MAX_GROWTH As Long = ARR_BUMP * (2 ^ ARR_DOUBLING_STEPS)
 #If VBA7 Then
-Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As LongPtr)
 Private Declare PtrSafe Function VarI8FromDec Lib "oleaut32" (ByRef pDecIn As Variant, ByRef i64Out As Currency) As Long
 Private Declare PtrSafe Function VarDecFromI8 Lib "oleaut32" (ByVal i64In As Currency, ByRef pDecOut As Variant) As Long
 Private Declare PtrSafe Function HeapAlloc Lib "kernel32" (ByVal hHeap As LongPtr, ByVal dwFlags As Long, ByVal dwBytes As LongPtr) As LongPtr
@@ -517,7 +523,13 @@ If Rows > 0 Or Rows = -1 Then
         Do While PropLastResult = SQLITE_ROW
             If Rows > -1 And RowsFetched >= Rows Then Exit Do
             If RowsFetched > ArrUBound Then
-                ArrUBound = RowsFetched + ARR_BUMP - 1
+                If ArrUBound < 0 Then
+                    ArrUBound = ARR_BUMP - 1
+                ElseIf ArrUBound < (ARR_MAX_GROWTH - 1) Then
+                    ArrUBound = ((ArrUBound + 1) * 2) - 1
+                Else
+                    ArrUBound = ArrUBound + ARR_MAX_GROWTH
+                End If
                 ReDim Preserve ArrRows(0 To (UBoundDataCols - LBoundDataCols), 0 To ArrUBound) As Variant
             End If
             For iCol = 0 To (UBoundDataCols - LBoundDataCols)
@@ -539,7 +551,13 @@ If Rows > 0 Or Rows = -1 Then
             Do While PropLastResult = SQLITE_ROW
                 If Rows > -1 And RowsFetched >= Rows Then Exit Do
                 If RowsFetched > ArrUBound Then
-                    ArrUBound = RowsFetched + ARR_BUMP - 1
+                    If ArrUBound < 0 Then
+                        ArrUBound = ARR_BUMP - 1
+                    ElseIf ArrUBound < (ARR_MAX_GROWTH - 1) Then
+                        ArrUBound = ((ArrUBound + 1) * 2) - 1
+                    Else
+                        ArrUBound = ArrUBound + ARR_MAX_GROWTH
+                    End If
                     ReDim Preserve ArrRows(0 To (Cols - 1), 0 To ArrUBound) As Variant
                 End If
                 For iCol = 0 To (Cols - 1)
